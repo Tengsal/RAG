@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 180 4% 11%;
+    --border: 252 20% 81%;
+    --radius: 1rem;
+  }
+
+  body {
+    background-color: #f9f9f9;
+    color: #1a1c1c;
+    font-family: 'Geist', sans-serif;
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(68, 65, 204, 0.05);
+}
+
+.animated-gradient-border {
+  position: relative;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 2rem;
+  z-index: 1;
+}
+.animated-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(90deg, #4441cc, #9026c3, #0055a9, #4441cc);
+  background-size: 300% 300%;
+  border-radius: 2rem;
+  z-index: -1;
+  animation: gradient-rotate 6s linear infinite;
+}
+@keyframes gradient-rotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.neural-progress {
+  background: linear-gradient(90deg, #4441cc, #9026c3, #4441cc);
+  background-size: 200% 100%;
+  animation: neural-flow 2s linear infinite;
+}
+@keyframes neural-flow {
+  0% { background-position: 100% 0%; }
+  100% { background-position: -100% 0%; }
+}
+
+.parallax-layer {
+  transform: translateY(var(--tw-parallax-y, 0));
+  transition: transform 0.1s ease-out;
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
