@@ -1,0 +1,10 @@
+# ADTU evidence RAG pipeline.
+# Install paddlepaddle BEFORE paddleocr (paddleocr's metadata depends on it;
+# pre-installing wins the version pin for Python 3.13).
+pymupdf>=1.24
+paddlepaddle>=3.2.1
+paddleocr>=3.1
+sentence-transformers>=3.3
+pymilvus>=2.4.2,<3
+milvus-lite>=3.2     # Windows: install directly (pymilvus's [milvus_lite] extra excludes win32, but 3.x is pure-python and works)
+pillow>=12
