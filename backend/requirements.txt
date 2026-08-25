@@ -8,3 +8,4 @@ sentence-transformers>=3.3
 pymilvus>=2.4.2,<3
 milvus-lite>=3.2     # Windows: install directly (pymilvus's [milvus_lite] extra excludes win32, but 3.x is pure-python and works)
 pillow>=12
+google-generativeai>=0.8,<1
