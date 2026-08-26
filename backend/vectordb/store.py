@@ -23,7 +23,17 @@ def get_client() -> MilvusClient:
     uri = (os.environ.get("MILVUS_URI")
            or os.environ.get("ADTU_MILVUS_DB")
            or config.DEFAULT_DB_URI)
-    return MilvusClient(uri=uri)
+    # Slow pymilvus's gRPC keepalive (default: pings every 10s). Milvus Lite
+    # throttles that rate and kills the connection with GOAWAY
+    # "too_many_pings", which crashes the API server at random intervals.
+    return MilvusClient(
+        uri=uri,
+        grpc_options={
+            "grpc.keepalive_time_ms": 60000,
+            "grpc.keepalive_timeout_ms": 10000,
+            "grpc.keepalive_permit_without_calls": False,
+        },
+    )
 
 
 def ensure_collection(client: MilvusClient) -> None:

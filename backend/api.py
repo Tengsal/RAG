@@ -3,6 +3,7 @@ Wraps the CLI pipeline into a high-speed HTTP API for the frontend.
 """
 
 import logging
+import re
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -58,6 +59,42 @@ class RAGResponse(BaseModel):
     follow_ups: Optional[List[str]] = None
     sources: Optional[List[Dict[str, Any]]] = None
 
+# --- Casual conversation pre-check ---
+# Greetings / thanks / small talk contain no university-specific factual
+# content, so they skip retrieval -> rerank -> validator and go straight to
+# the LLM with empty evidence. Only whole-query matches trigger this — a
+# factual question with a "hi" prefix still goes through the full pipeline.
+_CASUAL_PHRASES = {
+    "hello", "hi", "hey", "hey there", "hello there", "good morning",
+    "good afternoon", "good evening", "namaste",
+    "how are you", "how r u", "hows it going", "how is it going",
+    "whats up", "what is up",
+    "thank you", "thanks", "thanks a lot", "thank you so much", "thx",
+    "who are you", "what are you", "what can you do",
+    "what can you help me with", "what can you help with",
+    "what can i ask", "can you help me", "help",
+}
+
+
+def _is_casual(query: str) -> bool:
+    """True when the entire query is small talk with no factual content."""
+    normalized = re.sub(r"[^a-z0-9 ]", " ", query.strip().lower())
+    return " ".join(normalized.split()) in _CASUAL_PHRASES
+
+
+def _parse_follow_ups(answer_text: str):
+    """Split the LLM output into (main answer, follow-up questions)."""
+    if "Follow-up Questions:" not in answer_text:
+        return answer_text, []
+    main = answer_text.split("Follow-up Questions:")[0].strip()
+    follow_ups = [
+        line.strip().lstrip("12.")
+        for line in answer_text.split("Follow-up Questions:", 1)[1].strip().split("\n")
+        if line.strip().startswith("1.") or line.strip().startswith("2.")
+    ]
+    return main, follow_ups
+
+
 # --- PRE-LOAD MODELS ON STARTUP (The Speed Hack) ---
 @app.on_event("startup")
 async def load_models():
@@ -72,6 +109,29 @@ async def load_models():
 async def ask_question(req: QueryRequest):
     query = req.query
     log.info(f"Received query: {query}")
+
+    # 0. Casual pre-check: greetings/thanks/small talk bypass the
+    # retrieval -> rerank -> validator pipeline and go straight to the LLM
+    # with empty evidence. Factual queries continue through the pipeline.
+    if _is_casual(query):
+        final_answer = llm_module.generate_answer(
+            query,
+            evidence=[],
+            decision={"action": config.ACTION_ANSWER, "confidence": 1.0, "uncertainty": 0.0},
+            entities={"programs": [], "semesters": [], "years": []},
+        )
+        main_answer, follow_ups = _parse_follow_ups(final_answer)
+        return RAGResponse(
+            status="ANSWER",
+            query=query,
+            intent="casual",
+            entities={"programs": [], "semesters": [], "years": []},
+            confidence_score=1.0,
+            confidence_label="HIGH",
+            answer=main_answer,
+            follow_ups=follow_ups,
+            sources=[],
+        )
 
     # 0. Cache Check
     cached = cache_manager.get_cached_response(query)
@@ -158,16 +218,7 @@ async def ask_question(req: QueryRequest):
     final_answer = llm_module.generate_answer(query, evidence, decision, extracted)
     
     # Parse follow-ups if the LLM generated them
-    follow_ups = []
-    if "Follow-up Questions:" in final_answer:
-        parts = final_answer.split("Follow-up Questions:")
-        main_answer = parts[0].strip()
-        lines = parts[1].strip().split("\n")
-        for line in lines:
-            if line.strip().startswith("1.") or line.strip().startswith("2."):
-                follow_ups.append(line.strip().lstrip("12."))
-    else:
-        main_answer = final_answer
+    main_answer, follow_ups = _parse_follow_ups(final_answer)
 
     resp_data = {
         "status": "ANSWER",
