@@ -48,3 +48,11 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+backend/.venv/
+
+.env
+.env.local
+.env.*.local
+.next/
+.venv/
+node_modules/

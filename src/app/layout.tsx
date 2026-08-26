@@ -3,8 +3,8 @@ import '@/app/globals.css';
 import { Providers } from '@/components/providers';
 
 export const metadata: Metadata = {
-  title: 'Scholarly Precision | Academic AI Dashboard',
-  description: 'AI-Powered University Assistant for Admissions, Fee Structure, Exams & Campus Regulations.',
+  title: 'ADTU KB | Assam Down Town University Knowledge Base',
+  description: 'ADTU KB - AI-Powered Knowledge Base for Assam Down Town University Admissions, Syllabus, Fees & Regulations.',
 };
 
 export default function RootLayout({

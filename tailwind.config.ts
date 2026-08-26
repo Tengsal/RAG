@@ -79,6 +79,9 @@ const config: Config = {
         unit: "8px",
         "container-max": "1440px",
       },
+      boxShadow: {
+        xs: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

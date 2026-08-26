@@ -3,6 +3,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { HowItWorks } from '@/components/how-it-works';
+import { WhatsHappening } from '@/components/whats-happening';
+import { HERO_DATA, NAV_ITEMS, TERMINAL_DEMO_DATA, FEATURE_ITEMS } from '@/lib/landing-data';
+import { useAuth } from '@/context/auth-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +14,17 @@ export default function LandingPage() {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [chatInput, setChatInput] = useState('');
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleTryAssistant = () => {
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/chat');
+    } else if (user?.role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/chat');
+    }
+  };
 
   // WebGL Shader Animation initialization from code.html
   useEffect(() => {
@@ -137,34 +152,80 @@ void main() {
       <header className="fixed top-0 w-full z-[100] bg-[#f9f9f9]/30 backdrop-blur-3xl border-b border-white/10 shadow-[0_8px_32px_0_rgba(68,65,204,0.1)]">
         <nav className="flex justify-between items-center px-6 sm:px-20 py-4 max-w-[1440px] mx-auto">
           <Link href="/" className="text-2xl sm:text-3xl font-bold text-[#4441cc] tracking-tighter font-['Geist']">
-            UAAA AI
+            ADTU KB AI
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm">
-            <a className="text-[#4441cc] font-semibold border-b-2 border-[#4441cc] pb-1" href="#research">
-              Research
-            </a>
-            <a className="text-[#464554] hover:text-[#4441cc] transition-colors" href="#architecture">
-              Architecture
-            </a>
-            <a className="text-[#464554] hover:text-[#4441cc] transition-colors" href="#performance">
-              Performance
-            </a>
-            <Link className="text-[#464554] hover:text-[#4441cc] transition-colors" href="/documents">
-              Docs
-            </Link>
+            {NAV_ITEMS.map((item, idx) =>
+              item.isExternal ? (
+                <Link
+                  key={item.label}
+                  className="text-[#464554] hover:text-[#4441cc] transition-colors"
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <a
+                  key={item.label}
+                  className={
+                    idx === 0
+                      ? 'text-[#4441cc] font-semibold border-b-2 border-[#4441cc] pb-1'
+                      : 'text-[#464554] hover:text-[#4441cc] transition-colors'
+                  }
+                  href={item.href}
+                >
+                  {item.label}
+                </a>
+              )
+            )}
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
+            {!isAuthenticated ? (
+              <>
+                <Link
+                  href="/login"
+                  className="text-xs sm:text-sm font-semibold text-[#464554] hover:text-[#4441cc] transition-colors"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-xs sm:text-sm font-semibold text-[#4441cc] hover:underline"
+                >
+                  Register
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center gap-2.5 bg-white/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/40 shadow-sm">
+                <div className="w-6 h-6 rounded-full bg-[#4441cc] text-white font-bold text-[10px] flex items-center justify-center">
+                  {user?.name ? user.name[0].toUpperCase() : 'U'}
+                </div>
+                <span className="text-xs font-bold text-[#1a1c1c] truncate max-w-[100px]">
+                  {user?.name}
+                </span>
+                {user?.role === 'admin' && (
+                  <Link
+                    href="/admin"
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#9026c3]/10 text-[#9026c3] border border-[#9026c3]/20"
+                  >
+                    Admin
+                  </Link>
+                )}
+                <button
+                  onClick={() => logout()}
+                  className="text-[#464554] hover:text-red-600 p-0.5 rounded transition-colors"
+                  title="Logout Session"
+                >
+                  <span className="material-symbols-outlined text-base">logout</span>
+                </button>
+              </div>
+            )}
+
             <button
-              onClick={() => router.push('/chat')}
-              className="px-4 sm:px-6 py-2 rounded-full text-[#4441cc] font-semibold border border-[#4441cc]/20 hover:bg-[#4441cc]/5 transition-all text-xs sm:text-sm"
-            >
-              Join Waitlist
-            </button>
-            <button
-              onClick={() => router.push('/chat')}
+              onClick={handleTryAssistant}
               className="px-4 sm:px-6 py-2 rounded-full bg-[#4441cc] text-white font-semibold hover:bg-[#4441cc]/90 transition-all scale-95 active:scale-90 shadow-lg text-xs sm:text-sm"
             >
-              Deploy Agent
+              Try AI Assistant
             </button>
           </div>
         </nav>
@@ -173,39 +234,39 @@ void main() {
       {/* Main Content */}
       <main className="relative pt-32 pb-24 overflow-hidden">
         {/* Hero Section */}
-        <section id="research" className="px-6 sm:px-20 max-w-[1440px] mx-auto text-center mb-32 relative">
+        <section id="hero" className="px-6 sm:px-20 max-w-[1440px] mx-auto text-center mb-32 relative">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border-[#c7c4d7]/30 text-xs font-semibold text-[#4441cc] mb-8 shimmer">
             <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              verified
+              {HERO_DATA.badgeIcon}
             </span>
-            <span>ACADEMIC-GRADE RELIABILITY</span>
+            <span>{HERO_DATA.badgeText}</span>
           </div>
 
           <h1
             id="hero-title"
-            className="text-5xl sm:text-7xl lg:text-[72px] font-bold text-[#1a1c1c] mb-6 tracking-tighter parallax-layer leading-[1.1]"
+            className="text-4xl sm:text-6xl lg:text-[68px] font-bold text-[#1a1c1c] mb-6 tracking-tighter parallax-layer leading-[1.15] max-w-5xl mx-auto"
           >
-            AI That Knows <span className="text-[#4441cc] italic">When It Knows</span>
+            {HERO_DATA.headingMain}<span className="text-[#4441cc] italic">{HERO_DATA.headingItalic}</span>
           </h1>
 
-          <p className="text-base sm:text-xl text-[#464554] max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
-            Leveraging Adaptive Retrieval and Uncertainty Estimation to provide verified, hallucination-free intelligence backed by global university archives.
+          <p className="text-base sm:text-xl text-[#464554] max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
+            {HERO_DATA.subheading}
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button
-              onClick={() => router.push('/chat')}
+              onClick={handleTryAssistant}
               className="px-10 py-5 rounded-full bg-[#4441cc] text-white font-semibold text-lg hover:shadow-[0_0_40px_rgba(68,65,204,0.3)] transition-all shadow-xl"
             >
-              Explore Research
+              {HERO_DATA.ctaPrimary}
             </button>
-            <button
-              onClick={() => router.push('/chat')}
+            <a
+              href="#how-it-works"
               className="px-10 py-5 rounded-full glass-card text-[#1a1c1c] font-semibold text-lg hover:bg-white/50 transition-all flex items-center justify-center gap-2"
             >
-              <span className="material-symbols-outlined">play_circle</span>
-              <span>Watch Demo</span>
-            </button>
+              <span className="material-symbols-outlined">account_tree</span>
+              <span>{HERO_DATA.ctaSecondary}</span>
+            </a>
           </div>
 
           {/* Abstract Floating Glow Orbs */}
@@ -223,8 +284,8 @@ void main() {
                     <span className="material-symbols-outlined text-2xl">psychology</span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-[#1a1c1c]">UAAA Research Terminal</h3>
-                    <p className="text-xs text-[#464554] opacity-60 font-semibold">Real-time adaptive retrieval active</p>
+                    <h3 className="text-xl font-bold text-[#1a1c1c]">{TERMINAL_DEMO_DATA.terminalTitle}</h3>
+                    <p className="text-xs text-[#464554] opacity-60 font-semibold">{TERMINAL_DEMO_DATA.terminalSubtitle}</p>
                   </div>
                 </div>
 
@@ -235,7 +296,7 @@ void main() {
                       <span className="material-symbols-outlined text-[18px]">person</span>
                     </div>
                     <div className="bg-[#eeeeee] p-4 rounded-2xl rounded-tl-none text-sm text-[#1a1c1c] leading-relaxed">
-                      What are the long-term impacts of neural plasticity on adaptive retrieval in large language models?
+                      {TERMINAL_DEMO_DATA.sampleQuestion}
                     </div>
                   </div>
 
@@ -247,24 +308,21 @@ void main() {
                     <div className="glass-card p-5 rounded-2xl rounded-tr-none text-sm text-[#1a1c1c] border-[#4441cc]/20 space-y-3">
                       <div className="flex items-center gap-3">
                         <span className="px-2.5 py-1 bg-[#4441cc]/10 text-[#4441cc] text-[10px] font-bold rounded">
-                          CONFIDENCE: 98.4%
+                          CONFIDENCE: {TERMINAL_DEMO_DATA.confidenceScore}
                         </span>
                         <span className="px-2.5 py-1 bg-[#0055a9]/10 text-[#0055a9] text-[10px] font-bold rounded">
-                          VERIFIED SOURCE
+                          {TERMINAL_DEMO_DATA.verificationStatus}
                         </span>
                       </div>
                       <p className="leading-relaxed">
-                        Neural plasticity in adaptive retrieval systems facilitates dynamic weight recalibration. According to{' '}
-                        <strong>Dr. Aris (2023)</strong> from the{' '}
-                        <span className="text-[#4441cc] underline decoration-dotted">Oxford University Archive</span>, this allows for a 42% reduction in cognitive interference during high-uncertainty tasks...
+                        {TERMINAL_DEMO_DATA.answerText}
                       </p>
                       <div className="mt-4 pt-3 border-t border-[#c7c4d7]/30 flex gap-2 overflow-x-auto pb-2">
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-[#e2e2e2]/50 rounded-full text-xs font-semibold whitespace-nowrap">
-                          <span className="material-symbols-outlined text-[14px]">description</span> Oxford_Paper_2023.pdf
-                        </div>
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-[#e2e2e2]/50 rounded-full text-xs font-semibold whitespace-nowrap">
-                          <span className="material-symbols-outlined text-[14px]">description</span> Neural_Dynamic_v2.doc
-                        </div>
+                        {TERMINAL_DEMO_DATA.citations.map((cite, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 px-3 py-1 bg-[#e2e2e2]/50 rounded-full text-xs font-semibold whitespace-nowrap">
+                            <span className="material-symbols-outlined text-[14px]">{cite.icon}</span> {cite.name}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -276,7 +334,7 @@ void main() {
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     className="w-full bg-[#f3f3f4] border-b-2 border-[#4441cc]/20 focus:border-[#4441cc] focus:outline-none transition-all py-4 px-6 rounded-xl text-sm text-[#1a1c1c] placeholder:text-[#464554]/40"
-                    placeholder="Ask anything with verifiable precision..."
+                    placeholder={TERMINAL_DEMO_DATA.inputPlaceholder}
                     type="text"
                   />
                   <button
@@ -291,97 +349,26 @@ void main() {
           </div>
         </section>
 
-        {/* Adaptive Workflow Section ("The Uncertainty-Aware Lifecycle") */}
-        <section id="architecture" className="px-6 sm:px-20 max-w-[1440px] mx-auto mb-40 text-center">
-          <h2 className="text-3xl sm:text-5xl font-bold text-[#1a1c1c] mb-16 tracking-tight">
-            The Uncertainty-Aware Lifecycle
-          </h2>
+        {/* Campus Pulse & Student Notices ("What's Happening at AdtU") */}
+        <WhatsHappening />
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative">
-            {/* Horizontal Connector Line */}
-            <div className="hidden md:block absolute top-[40px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-[#4441cc]/20 via-[#4441cc] to-[#4441cc]/20 -z-10" />
-
-            {/* Step 1 */}
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-3xl glass-card flex items-center justify-center mb-6 text-[#4441cc] shadow-xl border-[#4441cc]/30">
-                <span className="material-symbols-outlined text-4xl">search_insights</span>
-              </div>
-              <h4 className="text-lg font-bold text-[#1a1c1c] mb-2">Query Parsing</h4>
-              <p className="text-xs font-semibold text-[#464554] px-4">Semantic intent decomposition</p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-3xl glass-card flex items-center justify-center mb-6 text-[#9026c3] shadow-xl border-[#9026c3]/30">
-                <span className="material-symbols-outlined text-4xl">hub</span>
-              </div>
-              <h4 className="text-lg font-bold text-[#1a1c1c] mb-2">Embedding</h4>
-              <p className="text-xs font-semibold text-[#464554] px-4">Multi-dimensional vector mapping</p>
-            </div>
-
-            {/* Step 3 (The Core Controller) */}
-            <div className="flex flex-col items-center relative">
-              <div className="w-24 h-24 rounded-[2.5rem] glass-card flex items-center justify-center mb-6 text-[#4441cc] shadow-2xl border-[#4441cc]/50 animated-gradient-border p-1">
-                <div className="w-full h-full rounded-[2.2rem] bg-white flex items-center justify-center shadow-inner">
-                  <span className="material-symbols-outlined text-5xl text-[#4441cc]">settings_input_component</span>
-                </div>
-              </div>
-              <h4 className="text-xl font-extrabold text-[#1a1c1c] mb-2">Controller</h4>
-              <p className="text-xs font-semibold text-[#464554] px-4">Adaptive retrieval steering</p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-3xl glass-card flex items-center justify-center mb-6 text-[#0055a9] shadow-xl border-[#0055a9]/30">
-                <span className="material-symbols-outlined text-4xl">analytics</span>
-              </div>
-              <h4 className="text-lg font-bold text-[#1a1c1c] mb-2">Uncertainty</h4>
-              <p className="text-xs font-semibold text-[#464554] px-4">Probability of hallucination check</p>
-            </div>
-
-            {/* Step 5 */}
-            <div className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-3xl glass-card flex items-center justify-center mb-6 text-[#4441cc] shadow-xl border-[#4441cc]/30">
-                <span className="material-symbols-outlined text-4xl">verified_user</span>
-              </div>
-              <h4 className="text-lg font-bold text-[#1a1c1c] mb-2">Verified Answer</h4>
-              <p className="text-xs font-semibold text-[#464554] px-4">Final citation-backed output</p>
-            </div>
-          </div>
-        </section>
+        {/* Adaptive Workflow Section ("How It Works / The Uncertainty-Aware RAG Pipeline") */}
+        <HowItWorks />
 
         {/* Features Grid */}
         <section className="px-6 sm:px-20 max-w-[1440px] mx-auto mb-40">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="glass-card p-10 rounded-3xl hover:-translate-y-2 transition-all duration-300 shadow-md">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4441cc] to-blue-400 flex items-center justify-center text-white mb-8 shadow-lg">
-                <span className="material-symbols-outlined text-3xl">menu_book</span>
+            {FEATURE_ITEMS.map((item) => (
+              <div key={item.id} className="glass-card p-10 rounded-3xl hover:-translate-y-2 transition-all duration-300 shadow-md">
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white mb-8 shadow-lg`}>
+                  <span className="material-symbols-outlined text-3xl">{item.icon}</span>
+                </div>
+                <h3 className="text-2xl font-bold text-[#1a1c1c] mb-4">{item.title}</h3>
+                <p className="text-sm text-[#464554] leading-relaxed">
+                  {item.description}
+                </p>
               </div>
-              <h3 className="text-2xl font-bold text-[#1a1c1c] mb-4">Citation-Backed</h3>
-              <p className="text-sm text-[#464554] leading-relaxed">
-                Every claim is linked to a source. Access peer-reviewed journals, university repositories, and verified databases in real-time.
-              </p>
-            </div>
-
-            <div className="glass-card p-10 rounded-3xl hover:-translate-y-2 transition-all duration-300 shadow-md">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#9026c3] to-pink-400 flex items-center justify-center text-white mb-8 shadow-lg">
-                <span className="material-symbols-outlined text-3xl">format_image_left</span>
-              </div>
-              <h3 className="text-2xl font-bold text-[#1a1c1c] mb-4">Hallucination Free</h3>
-              <p className="text-sm text-[#464554] leading-relaxed">
-                Our uncertainty layers prevent the model from 'guessing.' If the agent doesn't know, it will find the source or admit uncertainty.
-              </p>
-            </div>
-
-            <div className="glass-card p-10 rounded-3xl hover:-translate-y-2 transition-all duration-300 shadow-md">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0055a9] to-teal-400 flex items-center justify-center text-white mb-8 shadow-lg">
-                <span className="material-symbols-outlined text-3xl">bar_chart_4_bars</span>
-              </div>
-              <h3 className="text-2xl font-bold text-[#1a1c1c] mb-4">Confidence Metrics</h3>
-              <p className="text-sm text-[#464554] leading-relaxed">
-                Transparent probability scoring on every response. Understand exactly how reliable the information is before making decisions.
-              </p>
-            </div>
+            ))}
           </div>
         </section>
 
@@ -398,7 +385,7 @@ void main() {
                   Benchmarking Reliability
                 </h2>
                 <p className="text-base sm:text-lg text-[#464554] mb-10 leading-relaxed font-normal">
-                  UAAA outperforms standard RAG pipelines by identifying data gaps before they reach the generative stage.
+                  ADTU KB AI outperforms standard RAG pipelines by identifying data gaps before they reach the generative stage.
                 </p>
 
                 <div className="space-y-8">
@@ -507,9 +494,9 @@ void main() {
       <footer className="w-full py-16 px-6 sm:px-20 bg-[#f9f9f9] border-t border-[#c7c4d7]/30">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-[1440px] mx-auto text-sm">
           <div className="col-span-1">
-            <div className="text-2xl font-bold text-[#4441cc] mb-4">UAAA AI</div>
+            <div className="text-2xl font-bold text-[#4441cc] mb-4">ADTU KB AI</div>
             <p className="text-xs text-[#464554] opacity-70 font-medium">
-              © 2026 Neural Research Lab. Pioneering Uncertainty-Aware Intelligence.
+              © 2026 ADTU KB Intelligence. Grounded & Confidence-Aware RAG.
             </p>
           </div>
 

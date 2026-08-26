@@ -6,21 +6,19 @@ to prevent hallucination, force exact citations, and generate follow-ups
 """
 
 import os
-import google.generativeai as genai
+from google import genai
 import config
 # Configure Gemini API (reads from environment variable)
 api_key = os.environ.get("GOOGLE_API_KEY")
 if not api_key:
     print("Warning: GOOGLE_API_KEY not set. LLM generation will fail.")
-else:
-    genai.configure(api_key=api_key)
 
 # Use the fastest, most cost-effective Flash model
-_model = None
+_client = None
 def get_model():
     global _model
     if _model is None:
-        _model = genai.GenerativeModel('models/gemini-2.5-flash-lite')
+        _model = genai.GenerativeModel('models/gemini-2.5-flash') 
     return _model
 
 SYSTEM_PROMPT = """You are an AI academic counsellor for Assam down town University (ADTU).
@@ -108,7 +106,10 @@ STUDENT QUESTION: {query}
     
     # 4. Call Gemini
     try:
-        response = get_model().generate_content(final_prompt)
+        response = get_model().models.generate_content(
+            model="gemini-2.5-flash",
+            contents=final_prompt,
+        )
         return response.text
     except Exception as e:
         return f"LLM Generation Error: {str(e)}"
