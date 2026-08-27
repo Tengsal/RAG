@@ -13,13 +13,16 @@ api_key = os.environ.get("GOOGLE_API_KEY")
 if not api_key:
     print("Warning: GOOGLE_API_KEY not set. LLM generation will fail.")
 
-# Use the fastest, most cost-effective Flash model
 _client = None
-def get_model():
-    global _model
-    if _model is None:
-        _model = genai.GenerativeModel('models/gemini-2.5-flash') 
-    return _model
+
+
+def get_client():
+    global _client
+
+    if _client is None:
+        _client = genai.Client(api_key=api_key)
+
+    return _client
 
 SYSTEM_PROMPT = """You are an AI academic counsellor for Assam down town University (ADTU).
 You answer questions about programmes, curriculum, admissions, fees, faculty, placements, examinations, regulations and notices, and you also handle casual conversation.
@@ -106,7 +109,7 @@ STUDENT QUESTION: {query}
     
     # 4. Call Gemini
     try:
-        response = get_model().models.generate_content(
+        response = get_client().models.generate_content(
             model="gemini-2.5-flash",
             contents=final_prompt,
         )

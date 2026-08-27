@@ -61,6 +61,16 @@ def rerank(query: str, evidence: list, top_k: int = config.RERANK_TOP_K) -> list
         e["rerank_score"] = float(s)
         e["rerank_confidence"] = _sigmoid(float(s))
 
-    # Reorder by true relevance and keep the best top_k.
+    # Reorder by true relevance, then keep only the best chunk per document
+    # so a single PDF cannot flood the final top-K with near-duplicate chunks
+    # (e.g. two chunks of the same page occupying two slots).
     evidence.sort(key=lambda e: e["rerank_score"], reverse=True)
-    return evidence[:top_k]
+    deduped = []
+    seen_docs = set()
+    for e in evidence:
+        doc = e.get("source", "")
+        if doc in seen_docs:
+            continue
+        seen_docs.add(doc)
+        deduped.append(e)
+    return deduped[:top_k]

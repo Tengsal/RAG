@@ -152,19 +152,23 @@ async def ask_question(req: QueryRequest):
     plan = controller.build_search_plan(query, intent_res)
 
     # 3. Milvus Retrieval
+    # Union the intent-routed category searches with an ALWAYS-ON global
+    # sweep. The intent router is a weak signal (near-uniform scores for
+    # generic queries), so the cross-encoder — not the router — decides what
+    # is actually relevant. Previously the global search was a fallback gated
+    # on RETRIEVAL_MIN_SCORE, which never fired when the filtered search
+    # confidently returned the wrong documents.
     merged = []
     for cat in plan["categories"]:
         merged += ret_search.search(client, embed, query, top_k=config.CANDIDATE_TOP_K, category=cat)
-    
+    merged += ret_search.search(client, embed, query, top_k=config.CANDIDATE_TOP_K, category=None)
+
     best = {}
     for e in merged:
         cid = e["chunk_id"]
         if cid not in best or e["score"] > best[cid]["score"]:
             best[cid] = e
     candidates = sorted(best.values(), key=lambda x: x["score"], reverse=True)
-
-    if not candidates or candidates[0]["score"] < config.RETRIEVAL_MIN_SCORE:
-        candidates = ret_search.search(client, embed, query, top_k=config.CANDIDATE_TOP_K, category=None)
 
     if not candidates:
         return RAGResponse(status="REFUSE", query=query, answer="No evidence found in database.")
