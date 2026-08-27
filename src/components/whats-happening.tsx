@@ -28,19 +28,19 @@ export function WhatsHappening() {
   };
 
   return (
-    <section id="campus-updates" className="px-6 sm:px-20 max-w-[1440px] mx-auto mb-36">
+    <section id="campus-notices" className="px-6 sm:px-20 max-w-[1440px] mx-auto mb-36">
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-card border-[#c7c4d7]/30 text-xs font-semibold text-[#4441cc] mb-3">
             <span className="material-symbols-outlined text-[16px]">campaign</span>
-            <span>CAMPUS PULSE & NOTICES</span>
+            <span>OFFICIAL CAMPUS NOTICES</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-bold text-[#1a1c1c] tracking-tight">
-            What’s Happening at AdtU
+            Official Campus Notices & Circulars
           </h2>
           <p className="text-base text-[#464554] max-w-xl mt-3 leading-relaxed">
-            Essential orientation schedules, verification deadlines, cultural events, and notices for new students.
+            Essential orientation schedules, verification deadlines, circulars, and announcements for ADTU students and faculty.
           </p>
         </div>
 

@@ -16,8 +16,8 @@ interface HowItWorksProps {
 export function HowItWorks({
   id = 'how-it-works',
   className = 'px-6 sm:px-20 max-w-[1440px] mx-auto mb-40 text-center',
-  title = 'How It Works',
-  subtitle = 'Our uncertainty-aware RAG pipeline validates evidence and estimates confidence before answering.',
+  title = 'How ADTU AI Verifies Answers',
+  subtitle = 'Our grounded verification engine searches official documents, checks confidence, and cites sources before answering.',
   steps = HOW_IT_WORKS_STEPS,
 }: HowItWorksProps) {
   return (

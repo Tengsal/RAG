@@ -5,8 +5,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { HowItWorks } from '@/components/how-it-works';
 import { WhatsHappening } from '@/components/whats-happening';
-import { HERO_DATA, NAV_ITEMS, TERMINAL_DEMO_DATA, FEATURE_ITEMS } from '@/lib/landing-data';
+import { ProductPreviewDeck } from '@/components/product-preview-deck';
+import { TrustSecuritySection } from '@/components/trust-security-section';
+import { WhyVoiceSection } from '@/components/why-voice-section';
+import { TypewriterHeadline } from '@/components/typewriter-headline';
+import { HERO_DATA, NAV_ITEMS, FEATURE_ITEMS } from '@/lib/landing-data';
 import { useAuth } from '@/context/auth-context';
+import { CallingAgentModal } from '@/components/calling-agent-modal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +20,10 @@ export default function LandingPage() {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [chatInput, setChatInput] = useState('');
+  const [isCallingModalOpen, setIsCallingModalOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeNav, setActiveNav] = useState('#hero');
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
 
   const handleTryAssistant = () => {
@@ -122,10 +132,12 @@ void main() {
     };
   }, []);
 
-  // Parallax scroll effect
+  // Scroll listener for header shadow & height transformation
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.pageYOffset;
+      setIsScrolled(scrolled > 20);
+
       const heroTitle = document.getElementById('hero-title');
       if (heroTitle) {
         heroTitle.style.setProperty('--tw-parallax-y', `${scrolled * 0.15}px`);
@@ -148,18 +160,25 @@ void main() {
         <canvas ref={canvasRef} className="block w-full h-full" />
       </div>
 
-      {/* TopNavBar */}
-      <header className="fixed top-0 w-full z-[100] bg-[#f9f9f9]/30 backdrop-blur-3xl border-b border-white/10 shadow-[0_8px_32px_0_rgba(68,65,204,0.1)]">
-        <nav className="flex justify-between items-center px-6 sm:px-20 py-4 max-w-[1440px] mx-auto">
+      {/* TopNavBar with Dynamic Scroll Transformation */}
+      <header className={`fixed top-0 w-full z-[100] transition-all duration-300 ${
+        isScrolled
+          ? 'bg-white/85 backdrop-blur-2xl py-3 border-b border-[#c7c4d7]/40 shadow-md shadow-[#4441cc]/5'
+          : 'bg-[#f9f9f9]/40 backdrop-blur-2xl py-4 border-b border-white/20 shadow-[0_8px_32px_0_rgba(68,65,204,0.05)]'
+      }`}>
+        <nav className="flex justify-between items-center px-6 sm:px-20 max-w-[1440px] mx-auto">
           <Link href="/" className="text-2xl sm:text-3xl font-bold text-[#4441cc] tracking-tighter font-['Geist']">
-            ADTU KB AI
+            ADTU Campus AI
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm">
-            {NAV_ITEMS.map((item, idx) =>
-              item.isExternal ? (
+
+          {/* Navigation Items with Framer Motion Active Indicator */}
+          <div className="hidden md:flex items-center gap-7 text-sm font-medium">
+            {NAV_ITEMS.map((item) => {
+              const isActive = activeNav === item.href;
+              return item.isExternal ? (
                 <Link
                   key={item.label}
-                  className="text-[#464554] hover:text-[#4441cc] transition-colors"
+                  className="text-[#464554] hover:text-[#4441cc] transition-colors py-1 relative"
                   href={item.href}
                 >
                   {item.label}
@@ -167,19 +186,39 @@ void main() {
               ) : (
                 <a
                   key={item.label}
-                  className={
-                    idx === 0
-                      ? 'text-[#4441cc] font-semibold border-b-2 border-[#4441cc] pb-1'
-                      : 'text-[#464554] hover:text-[#4441cc] transition-colors'
-                  }
+                  onClick={() => setActiveNav(item.href)}
+                  className={`transition-colors py-1 relative ${
+                    isActive ? 'text-[#4441cc] font-semibold' : 'text-[#464554] hover:text-[#4441cc]'
+                  }`}
                   href={item.href}
                 >
                   {item.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#4441cc] rounded-full"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </a>
-              )
-            )}
+              );
+            })}
           </div>
+
           <div className="flex items-center gap-3 sm:gap-4">
+            {/* Single Main Navbar CTA: Call Campus AI */}
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setIsCallingModalOpen(true)}
+              className="px-5 py-2.5 rounded-full bg-[#4441cc] hover:bg-[#3835be] text-white font-bold shadow-md hover:shadow-[0_0_20px_rgba(68,65,204,0.35)] transition-all flex items-center gap-2 text-xs sm:text-sm group"
+              title="Call ADTU Campus AI"
+              aria-label="Call ADTU Campus AI"
+            >
+              <span className="material-symbols-outlined text-base group-hover:scale-110 transition-transform">phone_in_talk</span>
+              <span>Call Campus AI</span>
+            </motion.button>
+
             {!isAuthenticated ? (
               <>
                 <Link
@@ -196,77 +235,87 @@ void main() {
                 </Link>
               </>
             ) : (
-              <div className="flex items-center gap-2.5 bg-white/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/40 shadow-sm">
-                <div className="w-6 h-6 rounded-full bg-[#4441cc] text-white font-bold text-[10px] flex items-center justify-center">
-                  {user?.name ? user.name[0].toUpperCase() : 'U'}
-                </div>
-                <span className="text-xs font-bold text-[#1a1c1c] truncate max-w-[100px]">
-                  {user?.name}
-                </span>
-                {user?.role === 'admin' && (
-                  <Link
-                    href="/admin"
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#9026c3]/10 text-[#9026c3] border border-[#9026c3]/20"
-                  >
-                    Admin
-                  </Link>
-                )}
+              /* Compact User Profile Menu (Far Right Corner) */
+              <div className="relative">
                 <button
-                  onClick={() => logout()}
-                  className="text-[#464554] hover:text-red-600 p-0.5 rounded transition-colors"
-                  title="Logout Session"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#c7c4d7]/40 shadow-sm text-xs font-semibold text-[#1a1c1c] hover:bg-white transition-all"
                 >
-                  <span className="material-symbols-outlined text-base">logout</span>
+                  <div className="w-5 h-5 rounded-full bg-[#4441cc] text-white font-bold text-[10px] flex items-center justify-center">
+                    {user?.name ? user.name[0].toUpperCase() : 'U'}
+                  </div>
+                  <span className="truncate max-w-[90px]">{user?.name}</span>
+                  <span className="material-symbols-outlined text-sm text-[#777586]">expand_more</span>
                 </button>
+
+                <AnimatePresence>
+                  {isUserMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-44 bg-white/95 backdrop-blur-xl rounded-2xl p-2 border border-[#c7c4d7]/40 shadow-xl z-50 space-y-1 text-xs"
+                    >
+                      <div className="px-3 py-2 border-b border-[#c7c4d7]/30 font-semibold text-[#1a1c1c] truncate">
+                        {user?.name}
+                      </div>
+                      {user?.role === 'admin' && (
+                        <Link
+                          href="/admin"
+                          className="block px-3 py-2 rounded-xl hover:bg-[#eeeeee] font-semibold text-[#9026c3]"
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          logout();
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-red-50 text-red-600 font-semibold flex items-center justify-between transition-colors"
+                      >
+                        <span>Sign Out</span>
+                        <span className="material-symbols-outlined text-sm">logout</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
-
-            <button
-              onClick={handleTryAssistant}
-              className="px-4 sm:px-6 py-2 rounded-full bg-[#4441cc] text-white font-semibold hover:bg-[#4441cc]/90 transition-all scale-95 active:scale-90 shadow-lg text-xs sm:text-sm"
-            >
-              Try AI Assistant
-            </button>
           </div>
         </nav>
       </header>
 
       {/* Main Content */}
       <main className="relative pt-32 pb-24 overflow-hidden">
-        {/* Hero Section */}
-        <section id="hero" className="px-6 sm:px-20 max-w-[1440px] mx-auto text-center mb-32 relative">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border-[#c7c4d7]/30 text-xs font-semibold text-[#4441cc] mb-8 shimmer">
-            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+        {/* Hero Section — Clean Minimalist Layout */}
+        <section id="hero" className="px-6 sm:px-20 max-w-5xl mx-auto text-center mb-24 relative pt-8">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border-[#c7c4d7]/30 text-xs font-semibold text-[#4441cc] mb-6 shimmer">
+            <span className="material-symbols-outlined text-[16px]">
               {HERO_DATA.badgeIcon}
             </span>
             <span>{HERO_DATA.badgeText}</span>
           </div>
 
-          <h1
-            id="hero-title"
-            className="text-4xl sm:text-6xl lg:text-[68px] font-bold text-[#1a1c1c] mb-6 tracking-tighter parallax-layer leading-[1.15] max-w-5xl mx-auto"
-          >
-            {HERO_DATA.headingMain}<span className="text-[#4441cc] italic">{HERO_DATA.headingItalic}</span>
-          </h1>
+          {/* Framer Motion Typewriter Animated Headline */}
+          <TypewriterHeadline />
 
           <p className="text-base sm:text-xl text-[#464554] max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
             {HERO_DATA.subheading}
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button
+          {/* Single Hero CTA: Ask Campus AI */}
+          <div className="flex items-center justify-center">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={handleTryAssistant}
-              className="px-10 py-5 rounded-full bg-[#4441cc] text-white font-semibold text-lg hover:shadow-[0_0_40px_rgba(68,65,204,0.3)] transition-all shadow-xl"
+              className="w-full sm:w-auto px-10 py-4 sm:py-4.5 rounded-full bg-[#4441cc] hover:bg-[#3835be] text-white font-bold text-base sm:text-lg hover:shadow-[0_0_40px_rgba(68,65,204,0.4)] transition-all shadow-xl flex items-center justify-center gap-2.5 group"
             >
-              {HERO_DATA.ctaPrimary}
-            </button>
-            <a
-              href="#how-it-works"
-              className="px-10 py-5 rounded-full glass-card text-[#1a1c1c] font-semibold text-lg hover:bg-white/50 transition-all flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined">account_tree</span>
-              <span>{HERO_DATA.ctaSecondary}</span>
-            </a>
+              <span className="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">forum</span>
+              <span>{HERO_DATA.ctaPrimary}</span>
+            </motion.button>
           </div>
 
           {/* Abstract Floating Glow Orbs */}
@@ -274,80 +323,29 @@ void main() {
           <div className="absolute top-40 -right-20 w-80 h-80 bg-[#9026c3]/10 rounded-full blur-[120px] pointer-events-none" />
         </section>
 
-        {/* AI Chat Terminal Demo */}
-        <section className="px-6 sm:px-20 max-w-5xl mx-auto mb-40">
-          <div className="animated-gradient-border p-[1px]">
-            <div className="glass-card rounded-3xl overflow-hidden p-2 sm:p-4">
-              <div className="bg-white/50 rounded-2xl p-6 sm:p-10 shadow-inner">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 rounded-full bg-[#4441cc] flex items-center justify-center text-white shadow-md">
-                    <span className="material-symbols-outlined text-2xl">psychology</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-[#1a1c1c]">{TERMINAL_DEMO_DATA.terminalTitle}</h3>
-                    <p className="text-xs text-[#464554] opacity-60 font-semibold">{TERMINAL_DEMO_DATA.terminalSubtitle}</p>
-                  </div>
-                </div>
+        {/* Concise "Why Voice?" Section */}
+        <WhyVoiceSection />
 
-                <div className="space-y-6 mb-8">
-                  {/* User Question */}
-                  <div className="flex gap-4 max-w-[90%] sm:max-w-[80%]">
-                    <div className="w-8 h-8 rounded-full bg-[#e8e8e8] shrink-0 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[18px]">person</span>
-                    </div>
-                    <div className="bg-[#eeeeee] p-4 rounded-2xl rounded-tl-none text-sm text-[#1a1c1c] leading-relaxed">
-                      {TERMINAL_DEMO_DATA.sampleQuestion}
-                    </div>
-                  </div>
-
-                  {/* AI Verified Answer */}
-                  <div className="flex gap-4 max-w-[95%] sm:max-w-[85%] ml-auto flex-row-reverse">
-                    <div className="w-8 h-8 rounded-full bg-[#4441cc] shrink-0 flex items-center justify-center text-white">
-                      <span className="material-symbols-outlined text-[18px]">bolt</span>
-                    </div>
-                    <div className="glass-card p-5 rounded-2xl rounded-tr-none text-sm text-[#1a1c1c] border-[#4441cc]/20 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <span className="px-2.5 py-1 bg-[#4441cc]/10 text-[#4441cc] text-[10px] font-bold rounded">
-                          CONFIDENCE: {TERMINAL_DEMO_DATA.confidenceScore}
-                        </span>
-                        <span className="px-2.5 py-1 bg-[#0055a9]/10 text-[#0055a9] text-[10px] font-bold rounded">
-                          {TERMINAL_DEMO_DATA.verificationStatus}
-                        </span>
-                      </div>
-                      <p className="leading-relaxed">
-                        {TERMINAL_DEMO_DATA.answerText}
-                      </p>
-                      <div className="mt-4 pt-3 border-t border-[#c7c4d7]/30 flex gap-2 overflow-x-auto pb-2">
-                        {TERMINAL_DEMO_DATA.citations.map((cite, idx) => (
-                          <div key={idx} className="flex items-center gap-1.5 px-3 py-1 bg-[#e2e2e2]/50 rounded-full text-xs font-semibold whitespace-nowrap">
-                            <span className="material-symbols-outlined text-[14px]">{cite.icon}</span> {cite.name}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Input Form */}
-                <form onSubmit={handleChatSubmit} className="relative">
-                  <input
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    className="w-full bg-[#f3f3f4] border-b-2 border-[#4441cc]/20 focus:border-[#4441cc] focus:outline-none transition-all py-4 px-6 rounded-xl text-sm text-[#1a1c1c] placeholder:text-[#464554]/40"
-                    placeholder={TERMINAL_DEMO_DATA.inputPlaceholder}
-                    type="text"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#4441cc] text-white rounded-lg flex items-center justify-center shadow-md hover:scale-105 transition-transform"
-                  >
-                    <span className="material-symbols-outlined">arrow_upward</span>
-                  </button>
-                </form>
-              </div>
+        {/* Secondary Product Demo Section (RAG Proof of Accuracy) */}
+        <section id="product-demo" className="px-6 sm:px-20 max-w-[1440px] mx-auto mb-36">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-card border-[#c7c4d7]/30 text-xs font-semibold text-[#4441cc] mb-3">
+              <span className="material-symbols-outlined text-[16px]">menu_book</span>
+              <span>SECONDARY PROOF OF INTELLIGENCE</span>
             </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1c1c] tracking-tight mb-3">
+              How Answers Are Grounded in ADTU Documents
+            </h2>
+            <p className="text-base text-[#464554] leading-relaxed">
+              Explore how our underlying RAG system validates evidence, cites official sources, and refrains from guessing when information is unavailable.
+            </p>
           </div>
+
+          <ProductPreviewDeck />
         </section>
+
+        {/* Trust, Security & Reliability Section */}
+        <TrustSecuritySection />
 
         {/* Campus Pulse & Student Notices ("What's Happening at AdtU") */}
         <WhatsHappening />
@@ -541,6 +539,12 @@ void main() {
           </div>
         </div>
       </footer>
+
+      {/* Calling Agent Modal Overlay */}
+      <CallingAgentModal
+        isOpen={isCallingModalOpen}
+        onClose={() => setIsCallingModalOpen(false)}
+      />
     </div>
   );
 }
