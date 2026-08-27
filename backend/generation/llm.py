@@ -59,17 +59,16 @@ Reasoning: Information taken from Curriculum Details1.pdf.
 
 - The answer does NOT need to appear as an exact literal sentence in a single chunk. You may summarize, rephrase, synthesize, combine multiple chunks, and reason across them, as long as every factual claim is supported by the evidence.
 - Do NOT refuse merely because the wording of the question is not verbatim in the chunks.
+- CONFLICTING EVIDENCE: if a DYNAMIC document (notice, circular, announcement) contradicts a STATIC document (regulation, curriculum, fee structure), the DYNAMIC one is newer and overrides the STATIC one — base your answer on the DYNAMIC document, cite it, and briefly note what the older STATIC document said. If two documents conflict and you cannot tell which is newer, cite both and state that the documents disagree.
 - Only reply with EXACTLY: "I couldn't find this information in the available university documents." when the question is university-specific factual AND the retrieved evidence genuinely does not support an answer (the required information is absent from the evidence).
-- Suggest exactly 2 relevant follow-up questions based on the retrieved evidence and context.
+- Be concise: answer only what was asked, in 2-4 sentences.
 
-FORMAT YOUR RESPONSE EXACTLY LIKE THIS (always, for both CASUAL and FACTUAL):
+FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
 Answer: [Your response]
-Reasoning: [1 short sentence: which documents you used, OR "No university document evidence was required for this conversational response." for casual queries]
-Follow-up Questions:
-1. [Question 1]
-2. [Question 2]
 
-If you must give the "I couldn't find this information..." refusal, put that exact sentence alone as the Answer and briefly state why in Reasoning; the Follow-up Questions section is optional in that case.
+- FACTUAL: output ONLY the Answer line — no Reasoning section, no Follow-up Questions. Every university-specific fact must carry an inline citation: [Source: filename | Page X].
+- CASUAL: the Answer line plus, optionally, a "Follow-up Questions:" block with exactly 2 suggestions.
+- If you must give the "I couldn't find this information..." refusal, put that exact sentence alone as the Answer.
 """
 
 def generate_answer(query: str, evidence: list, decision: dict, entities: dict) -> str:
@@ -82,7 +81,11 @@ def generate_answer(query: str, evidence: list, decision: dict, entities: dict) 
     for i, e in enumerate(evidence, 1):
         # Extract just the filename from the path for cleaner citations
         filename = e['source'].split('/')[-1]
-        context_text += f"[Chunk {i}] Source: {filename} | Page: {e['page']}\n"
+        # Label each chunk STATIC vs DYNAMIC so the model can apply the
+        # conflict-resolution rule (newer DYNAMIC notices override STATIC).
+        kind = "DYNAMIC" if e.get("category", "") in config.DYNAMIC_CATEGORIES else "STATIC"
+        context_text += (f"[Chunk {i}] Source: {filename} | Page: {e['page']} "
+                         f"| Type: {kind} ({e.get('category', '')})\n")
         context_text += f"Text: {e['text']}\n\n"
         
     # 2. Map composite score to High/Medium/Low label
@@ -110,8 +113,11 @@ STUDENT QUESTION: {query}
     # 4. Call Gemini
     try:
         response = get_client().models.generate_content(
-            model="gemini-2.5-flash",
+            model=config.GEMINI_MODEL,
             contents=final_prompt,
+            config=genai.types.GenerateContentConfig(
+                max_output_tokens=config.LLM_MAX_OUTPUT_TOKENS,
+            ),
         )
         return response.text
     except Exception as e:

@@ -7,6 +7,7 @@ flowing between them can't drift.
 
 import hashlib
 import os
+import re
 from pathlib import Path
 from typing import Dict, List, TypedDict
 
@@ -117,18 +118,34 @@ RERANK_TOP_K = int(os.environ.get("RERANK_TOP_K", "5"))
 
 # Small + fast on CPU. For higher accuracy (slower), switch to
 # "BAAI/bge-reranker-v2-m3" — same family as BGE-M3.
+# Benchmarked 2026-08-27: L-2-v2 is ~40% faster than L-6-v2 but its
+# rerank confidences collapse to near-zero on ~3/5 benchmark queries,
+# flipping ANSWER -> REFUSE/CLARIFY and dropping the answer-bearing
+# chunk (e.g. fees.pdf for the BCA fee query). Kept L-6-v2 for recall.
 RERANKER_MODEL_NAME = os.environ.get(
     "RERANKER_MODEL_NAME", "cross-encoder/ms-marco-MiniLM-L-6-v2"
 )
 
+# Rerank pool bound: keep only the top-N unique chunks by retrieval (cosine)
+# score before cross-encoder reranking. The cross-encoder is the per-request
+# cost center (~60 ms/pair on CPU for MiniLM-L6), and the union retrieval
+# (category searches + always-on global sweep) already ranks candidates by
+# cosine, so reranking the best N preserves recall for the answer-bearing
+# chunks while cutting the dominant stage ~3x. Raise this if source
+# verification shows regressions.
+RERANK_CANDIDATE_MAX = int(os.environ.get("RERANK_CANDIDATE_MAX", "20"))
+
 # -----------------------------
 # Phase 5: Epistemic / Evidence Validator & Uncertainty Score
 # -----------------------------
-# Weights for combining the 3 signals into a single Composite Confidence score.
+# Weights for combining the 4 signals into a single Composite Confidence score.
 # They must sum to 1.0. (Section 6 & 14 of research notes)
+# Reranker stays dominant but cedes 0.10 to the new coverage signal so a
+# single lucky chunk can no longer carry the whole score on its own.
 W_INTENT = 0.20     # How well the query matches the university domain.
-W_RETRIEVER = 0.30  # Milvus cosine similarity (broad match).
-W_RERANKER = 0.50   # Cross-encoder confidence (deep, exact match).
+W_RETRIEVER = 0.25  # Milvus cosine similarity (broad match).
+W_RERANKER = 0.40   # Cross-encoder confidence (deep, exact match).
+W_COVERAGE = 0.15   # Citation/chunk agreement across the top-3 chunks.
 
 # Thresholds for the Decision Gate (Section 8 & 14 of research notes).
 THRESHOLD_HIGH = 0.45   # Lowered so it answers more readily
@@ -159,6 +176,19 @@ REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
 # SYN timeout of 20-50 s on the first request.
 REDIS_CONNECT_TIMEOUT = float(os.environ.get("REDIS_CONNECT_TIMEOUT", "1.0"))
 REDIS_SOCKET_TIMEOUT = float(os.environ.get("REDIS_SOCKET_TIMEOUT", "1.0"))
+
+# -----------------------------
+# Phase 7/8: Grounded LLM Generation
+# -----------------------------
+# Gemini model for grounded generation. Benchmark candidates on this setup:
+#   gemini-2.5-flash      - default, strong + fast
+#   gemini-2.5-flash-lite - smaller/faster, benchmarked for this workload
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+
+# Hard cap on generated tokens: bounds generation latency and keeps answers
+# concise. Citations are mandatory, so the cap stays generous enough for a
+# 2-4 sentence cited answer.
+LLM_MAX_OUTPUT_TOKENS = int(os.environ.get("LLM_MAX_OUTPUT_TOKENS", "400"))
 
 # Semantic intent descriptions used for Phase 2 Step 1 intent detection.
 #
@@ -271,6 +301,15 @@ def env_str(key: str, default: str) -> str:
 def env_int(key: str, default: int) -> int:
     v = os.environ.get(key)
     return int(v) if v else default
+
+
+def normalize_query(query: str) -> str:
+    """Canonical key form: lowercase, punctuation collapsed to single spaces.
+
+    Used by both the cache layer and the embedding memo so "Who is the VC?"
+    and "who is the vc" hit the same cached answer and vector.
+    """
+    return " ".join(re.sub(r"[^a-z0-9 ]", " ", query.strip().lower()).split())
 
 
 def file_sha256(path: Path) -> str:

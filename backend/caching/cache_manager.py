@@ -33,6 +33,15 @@ def _redis_reachable() -> bool:
     except OSError:
         return False
 
+def warmup():
+    """Resolve Redis reachability ONCE at startup instead of inside the first
+    request. When Redis is down, the raw-socket pre-flight costs ~1-2 s; if it
+    runs inside the request, the first caller pays it. After warmup, every
+    request takes the instant in-memory path.
+    """
+    _get_redis()
+
+
 def _get_redis():
     global _redis_client
     if _redis_client is None:
@@ -67,28 +76,34 @@ def _get_memory_cache():
 
 def get_cache_key(query: str) -> str:
     """Create a unique, normalized hash for the question."""
-    clean_query = query.strip().lower()
+    clean_query = config.normalize_query(query)
     return f"adtu_rag:{hashlib.md5(clean_query.encode()).hexdigest()}"
 
 def get_cached_response(query: str) -> dict | None:
     """Retrieve a cached response if it exists."""
     if not config.CACHE_ENABLED:
         return None
-        
+
     key = get_cache_key(query)
-    
+
     # Try Redis first
     r = _get_redis()
     if r:
         try:
             data = r.get(key)
             if data:
+                log.info("cache HIT (redis): %r", query)
                 return json.loads(data)
         except Exception:
             pass
-            
+
     # Fallback to memory
-    return _get_memory_cache().get(key)
+    hit = _get_memory_cache().get(key)
+    if hit is not None:
+        log.info("cache HIT (memory): %r", query)
+    else:
+        log.info("cache MISS: %r", query)
+    return hit
 
 def save_to_cache(query: str, response_data: dict):
     """Save the final pipeline result to the cache."""

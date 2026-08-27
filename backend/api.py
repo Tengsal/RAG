@@ -13,6 +13,8 @@ from typing import List, Dict, Any, Optional
 
 # Import our existing pipeline modules
 import config
+from parser import extract
+from parser import chunk
 from embeddings import embed
 from vectordb import store
 from retrieval import search as ret_search
@@ -49,16 +51,17 @@ class _StageTimer:
         self.stages[name] = now - self._t_prev
         self._t_prev = now
 
-    def emit(self):
-        if not _TIMING_ENABLED:
-            return
+    def emit(self) -> dict:
+        """Print the timing block (if enabled) and return the stages dict."""
         self.stages.setdefault("total", _perf.perf_counter() - self._t0)
-        print("===== RAG TIMING /ask =====", flush=True)
-        print(f"  query: {self.query!r}", flush=True)
-        for name in _TIMING_ORDER:
-            if name in self.stages:
-                print(f"  {name:10s} {self.stages[name]:7.3f}s", flush=True)
-        print("===== END RAG TIMING =====", flush=True)
+        if _TIMING_ENABLED:
+            print("===== RAG TIMING /ask =====", flush=True)
+            print(f"  query: {self.query!r}", flush=True)
+            for name in _TIMING_ORDER:
+                if name in self.stages:
+                    print(f"  {name:10s} {self.stages[name]:7.3f}s", flush=True)
+            print("===== END RAG TIMING =====", flush=True)
+        return dict(self.stages)
 
 # Initialize Milvus client ONCE at startup to prevent "Too many pings" crash
 log.info("Connecting to Milvus Lite...")
@@ -92,6 +95,7 @@ class RAGResponse(BaseModel):
     clarification_question: Optional[str] = None
     follow_ups: Optional[List[str]] = None
     sources: Optional[List[Dict[str, Any]]] = None
+    timings: Optional[Dict[str, float]] = None  # per-stage wall times (perf_counter)
 
 # --- Casual conversation pre-check ---
 # Greetings / thanks / small talk contain no university-specific factual
@@ -116,6 +120,42 @@ def _is_casual(query: str) -> bool:
     return " ".join(normalized.split()) in _CASUAL_PHRASES
 
 
+# --- Out-of-domain gate ---
+# Spec: explicitly refuse medical / legal / political / relationship advice
+# (truth over fluency — these topics lie outside the university evidence
+# base). Patterns are deliberately conservative: only clear advice-seeking or
+# unambiguous off-topic phrasings, so questions about ADTU's own programmes,
+# courses and notices still pass through.
+_OOD_PATTERNS = [
+    r"\b(medical|health|diet|fitness|nutrition)\s+advice\b",
+    r"\bshould\s+i\s+take\s+(medicine|medication|tablet|pill|drug)",
+    r"\blegal\s+advice\b",
+    r"\bcan\s+i\s+sue\b",
+    r"\bfile\s+a\s+(case|lawsuit)\b",
+    r"\bwho\s+is\s+the\s+prime\s+minister\b",
+    r"\bprime\s+minister\s+of\b",
+    r"\bchief\s+minister\b",
+    r"\bpresident\s+of\s+(india|the\s+united\s+states|usa|america)\b",
+    r"\bpolitical\s+party\b",
+    r"\brelationship\s+advice\b",
+    r"\bmy\s+(boyfriend|girlfriend|husband|wife|partner)\b",
+    r"\bbreak\s*up\s+with\b",
+    r"\bdating\s+advice\b",
+]
+
+_OOD_REFUSAL = (
+    "I'm an ADTU academic information assistant, so I can't help with that "
+    "topic. Ask me about admissions, programmes, fees, placements, "
+    "examinations, regulations, or notices instead."
+)
+
+
+def _is_out_of_domain(query: str) -> bool:
+    """True when the query asks for advice outside the university domain."""
+    q = " " + query.strip().lower() + " "
+    return any(re.search(p, q) for p in _OOD_PATTERNS)
+
+
 def _parse_follow_ups(answer_text: str):
     """Split the LLM output into (main answer, follow-up questions)."""
     if "Follow-up Questions:" not in answer_text:
@@ -134,8 +174,11 @@ def _parse_follow_ups(answer_text: str):
 async def load_models():
     log.info("🔥 Warming up AI models and Milvus...")
     # Trigger lazy loaders so the first user doesn't wait
-    intent_module.detect_intent("warmup") 
+    intent_module.detect_intent("warmup")
     rerank_module.get_reranker()
+    # Resolve Redis reachability now (the pre-flight costs ~1-2 s when Redis
+    # is down); otherwise the first /ask request pays it inside its cache stage.
+    cache_manager.warmup()
     log.info("✅ Server is warm and ready for requests!")
 
 # --- THE MAIN ENDPOINT ---
@@ -157,7 +200,7 @@ async def ask_question(req: QueryRequest):
         )
         T.mark("llm")
         main_answer, follow_ups = _parse_follow_ups(final_answer)
-        T.emit()
+        timings = T.emit()
         return RAGResponse(
             status="ANSWER",
             query=query,
@@ -168,6 +211,24 @@ async def ask_question(req: QueryRequest):
             answer=main_answer,
             follow_ups=follow_ups,
             sources=[],
+            timings=timings,
+        )
+
+    # 0.5 Out-of-domain gate: medical / legal / political / relationship
+    # advice is refused explicitly — it can never be grounded in university
+    # documents. Runs before the cache so refusals are never served stale.
+    if _is_out_of_domain(query):
+        timings = T.emit()
+        return RAGResponse(
+            status="REFUSE",
+            query=query,
+            intent="out_of_domain",
+            entities={"programs": [], "semesters": [], "years": []},
+            confidence_score=0.0,
+            confidence_label="LOW",
+            answer=_OOD_REFUSAL,
+            sources=[],
+            timings=timings,
         )
 
     # 0. Cache Check
@@ -175,8 +236,8 @@ async def ask_question(req: QueryRequest):
     T.mark("cache")
     if cached:
         log.info("⚡ CACHE HIT!")
-        T.emit()
-        return RAGResponse(**cached)
+        timings = T.emit()
+        return RAGResponse(**cached, timings=timings)
 
     # Use the global client instead of creating a new one every time
     client = MILVUS_CLIENT
@@ -227,11 +288,24 @@ async def ask_question(req: QueryRequest):
     T.mark("merge")
 
     if not candidates:
-        T.emit()
-        return RAGResponse(status="REFUSE", query=query, answer="No evidence found in database.")
+        timings = T.emit()
+        return RAGResponse(status="REFUSE", query=query,
+                           answer="No evidence found in database.", timings=timings)
+
+    # Bound the rerank pool: the cross-encoder is the per-request cost center
+    # (~60 ms/pair on CPU). Union retrieval (category searches + always-on
+    # global sweep) already produced a diverse candidate set ranked by
+    # cosine; the cross-encoder only needs to pick the best few from the
+    # strongest N. RERANK_CANDIDATE_MAX is configurable so recall can be
+    # traded back if source verification regresses.
+    if len(candidates) > config.RERANK_CANDIDATE_MAX:
+        candidates = candidates[: config.RERANK_CANDIDATE_MAX]
+    log.info("rerank: %d candidates (cap %d)", len(candidates),
+             config.RERANK_CANDIDATE_MAX)
 
     # 4. Rerank
     evidence = rerank_module.rerank(query, candidates, top_k=config.RERANK_TOP_K)
+    log.info("rerank done: %d evidence selected", len(evidence))
     T.mark("reranking")
 
     # 5. Validate
@@ -260,8 +334,8 @@ async def ask_question(req: QueryRequest):
             "sources": sources
         }
         cache_manager.save_to_cache(query, resp_data)
-        T.emit()
-        return RAGResponse(**resp_data)
+        timings = T.emit()
+        return RAGResponse(**resp_data, timings=timings)
 
     if decision["action"] == config.ACTION_CLARIFY:
         clarify_q = clarify_module.generate_clarification(intent_res, extracted, evidence)
@@ -276,12 +350,17 @@ async def ask_question(req: QueryRequest):
             "sources": sources
         }
         # Don't cache clarifications usually, or cache if you want
-        T.emit()
-        return RAGResponse(**resp_data)
+        timings = T.emit()
+        return RAGResponse(**resp_data, timings=timings)
 
     # 7. LLM Generation (ANSWER)
     final_answer = llm_module.generate_answer(query, evidence, decision, extracted)
     T.mark("llm")
+
+    # Never cache transient LLM failures (quota/network errors) — an error
+    # string would otherwise be served from the cache for up to CACHE_TTL_SECONDS.
+    if final_answer.startswith("LLM Generation Error"):
+        log.warning("not caching LLM failure for query %r", query)
 
     # Parse follow-ups if the LLM generated them
     main_answer, follow_ups = _parse_follow_ups(final_answer)
@@ -298,6 +377,83 @@ async def ask_question(req: QueryRequest):
         "sources": sources
     }
 
-    cache_manager.save_to_cache(query, resp_data)
-    T.emit()
-    return RAGResponse(**resp_data)
+    if not final_answer.startswith("LLM Generation Error"):
+        cache_manager.save_to_cache(query, resp_data)
+    timings = T.emit()
+    return RAGResponse(**resp_data, timings=timings)
+
+
+# --- Ingest endpoint (Stage 1: Knowledge Base & Ingestion) ---
+class IngestRequest(BaseModel):
+    only: Optional[str] = None   # limit to one category folder, e.g. "faculty"
+    limit: Optional[int] = None  # cap the number of PDFs (testing)
+    reset: bool = False          # drop the collection before ingesting
+
+
+class IngestResponse(BaseModel):
+    ingested: int
+    skipped: int        # already in the DB (sha256 match)
+    failed: int
+    total_chunks: int
+
+
+@app.post("/ingest", response_model=IngestResponse)
+async def ingest_documents(req: IngestRequest):
+    """Ingest PDFs from data/ into Milvus.
+
+    Mirrors the CLI ingest flow (main.py cmd_ingest): extract -> chunk ->
+    embed -> insert, with sha256 dedupe so re-ingesting a file is a no-op.
+    Runs synchronously — Milvus Lite is single-writer, so ingestion must not
+    overlap with another write to the same DB.
+    """
+    files = sorted(config.DATA_DIR.glob("*/*.pdf"))
+    if req.only:
+        files = [p for p in files if p.parent.name == req.only]
+    if req.limit:
+        files = files[: req.limit]
+    if not files:
+        raise HTTPException(status_code=404, detail="No PDFs found under data/.")
+
+    client = MILVUS_CLIENT
+    if req.reset:
+        store.drop_collection(client)
+    store.ensure_collection(client)
+    client.load_collection(config.COLLECTION_NAME)
+
+    next_id = store.max_chunk_id(client) + 1
+    ingested = skipped = failed = 0
+    total_chunks = 0
+
+    for path in files:
+        src = config.rel_source(path)
+        try:
+            sha = config.file_sha256(path)
+            if store.has_file(client, sha):
+                skipped += 1
+                continue
+            ext = extract.extract_pdf(path)
+            chunks = chunk.chunk_extraction(ext)
+            if not chunks:
+                log.warning("ingest: no chunks for %s", src)
+                failed += 1
+                continue
+            vectors = embed.embed_texts([c["text"] for c in chunks])
+            records = [
+                {"chunk_id": next_id + j, **c, "vector": vectors[j].tolist()}
+                for j, c in enumerate(chunks)
+            ]
+            store.insert_records(client, records)
+            next_id += len(chunks)
+            total_chunks += len(chunks)
+            ingested += 1
+            log.info("ingested %s (%d chunks)", src, len(chunks))
+        except extract.ExtractionError:
+            log.warning("ingest: extraction failed for %s", src)
+            failed += 1
+        except Exception:
+            log.exception("ingest failed for %s", src)
+            failed += 1
+
+    return IngestResponse(
+        ingested=ingested, skipped=skipped, failed=failed, total_chunks=total_chunks
+    )

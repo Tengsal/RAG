@@ -57,12 +57,17 @@ _QUERY_VEC_CACHE_MAX = 8  # keep only the most recent queries (~32 KB total)
 
 
 def embed_query(query: str) -> np.ndarray:
-    """(1024,) float32, L2-normalized. Memoized per query string."""
-    vec = _QUERY_VEC_CACHE.get(query)
+    """(1024,) float32, L2-normalized. Memoized per normalized query string
+    (same normalization as the cache layer, so cached answers and cached
+    vectors agree)."""
+    key = config.normalize_query(query)
+    vec = _QUERY_VEC_CACHE.get(key)
     if vec is not None:
+        log.info("embed_query CACHE HIT: %r", query)
         return vec
     if len(_QUERY_VEC_CACHE) >= _QUERY_VEC_CACHE_MAX:
         _QUERY_VEC_CACHE.clear()
+    log.info("embed_query CACHE MISS: %r", query)
     vec = embed_texts([query])[0]
-    _QUERY_VEC_CACHE[query] = vec
+    _QUERY_VEC_CACHE[key] = vec
     return vec

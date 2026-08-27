@@ -7,7 +7,7 @@ and decides the next action (Section 6, 8 & 14 of the research notes):
     THRESHOLD_LOW <= composite < HIGH    -> CLARIFY
     composite <  THRESHOLD_LOW           -> REFUSE
 
-Signals used:
+Signals used (all four weighted in the composite via config.W_*):
     intent    - intent detection confidence (does the question belong to ADTU?)
     retriever - top Milvus cosine similarity (broad semantic match)
     reranker  - top cross-encoder confidence (deep, exact match)
@@ -67,6 +67,7 @@ def validate(intent_result: dict, evidence: list) -> dict:
         config.W_INTENT * s_intent
         + config.W_RETRIEVER * s_retriever
         + config.W_RERANKER * s_reranker
+        + config.W_COVERAGE * s_coverage
     )
 
     reasons = [
