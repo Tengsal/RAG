@@ -154,6 +154,12 @@ CACHE_TTL_SECONDS = int(os.environ.get("CACHE_TTL_SECONDS", "3600"))
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
 
+# Fail-fast Redis timeouts (seconds). If Redis is unreachable, the cache layer
+# must fall back to the in-memory cache in milliseconds — not after an OS TCP
+# SYN timeout of 20-50 s on the first request.
+REDIS_CONNECT_TIMEOUT = float(os.environ.get("REDIS_CONNECT_TIMEOUT", "1.0"))
+REDIS_SOCKET_TIMEOUT = float(os.environ.get("REDIS_SOCKET_TIMEOUT", "1.0"))
+
 # Semantic intent descriptions used for Phase 2 Step 1 intent detection.
 #
 # These are intentionally richer than folder names. Each description represents

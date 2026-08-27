@@ -3,7 +3,9 @@ Wraps the CLI pipeline into a high-speed HTTP API for the frontend.
 """
 
 import logging
+import os
 import re
+import time as _perf
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -25,6 +27,38 @@ from caching import cache_manager
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("adtu.api")
+
+# --- Per-request stage timings (perf_counter) ---
+# Printed for every /ask request by default; set RAG_TIMING=0 to disable.
+_TIMING_ENABLED = os.environ.get("RAG_TIMING", "1").lower() not in ("0", "false", "off", "no")
+_TIMING_ORDER = ["cache", "embedding", "intent", "retrieval", "merge", "reranking",
+                 "validation", "llm", "total"]
+
+
+class _StageTimer:
+    """Collects per-stage wall times; each mark() closes the previous segment."""
+
+    def __init__(self, query: str):
+        self.query = query
+        self.stages = {}
+        self._t0 = _perf.perf_counter()
+        self._t_prev = self._t0
+
+    def mark(self, name: str):
+        now = _perf.perf_counter()
+        self.stages[name] = now - self._t_prev
+        self._t_prev = now
+
+    def emit(self):
+        if not _TIMING_ENABLED:
+            return
+        self.stages.setdefault("total", _perf.perf_counter() - self._t0)
+        print("===== RAG TIMING /ask =====", flush=True)
+        print(f"  query: {self.query!r}", flush=True)
+        for name in _TIMING_ORDER:
+            if name in self.stages:
+                print(f"  {name:10s} {self.stages[name]:7.3f}s", flush=True)
+        print("===== END RAG TIMING =====", flush=True)
 
 # Initialize Milvus client ONCE at startup to prevent "Too many pings" crash
 log.info("Connecting to Milvus Lite...")
@@ -109,6 +143,7 @@ async def load_models():
 async def ask_question(req: QueryRequest):
     query = req.query
     log.info(f"Received query: {query}")
+    T = _StageTimer(query)
 
     # 0. Casual pre-check: greetings/thanks/small talk bypass the
     # retrieval -> rerank -> validator pipeline and go straight to the LLM
@@ -120,7 +155,9 @@ async def ask_question(req: QueryRequest):
             decision={"action": config.ACTION_ANSWER, "confidence": 1.0, "uncertainty": 0.0},
             entities={"programs": [], "semesters": [], "years": []},
         )
+        T.mark("llm")
         main_answer, follow_ups = _parse_follow_ups(final_answer)
+        T.emit()
         return RAGResponse(
             status="ANSWER",
             query=query,
@@ -135,8 +172,10 @@ async def ask_question(req: QueryRequest):
 
     # 0. Cache Check
     cached = cache_manager.get_cached_response(query)
+    T.mark("cache")
     if cached:
         log.info("⚡ CACHE HIT!")
+        T.emit()
         return RAGResponse(**cached)
 
     # Use the global client instead of creating a new one every time
@@ -144,8 +183,15 @@ async def ask_question(req: QueryRequest):
     if store.count_rows(client) == 0:
         raise HTTPException(status_code=500, detail="Database empty. Run ingest first.")
 
+    # 1. Embed the query ONCE. Intent detection and every Milvus search reuse
+    # this exact vector through embed_query's memo (BGE-M3 is deterministic),
+    # so the query is no longer re-encoded per category search.
+    embed.embed_query(query)
+    T.mark("embedding")
+
     # 1. Intent & Entities
     intent_res = intent_module.detect_intent(query)
+    T.mark("intent")
     extracted = entity_module.extract_entities(query)
 
     # 2. Controller
@@ -162,22 +208,35 @@ async def ask_question(req: QueryRequest):
     for cat in plan["categories"]:
         merged += ret_search.search(client, embed, query, top_k=config.CANDIDATE_TOP_K, category=cat)
     merged += ret_search.search(client, embed, query, top_k=config.CANDIDATE_TOP_K, category=None)
+    T.mark("retrieval")
 
     best = {}
     for e in merged:
         cid = e["chunk_id"]
         if cid not in best or e["score"] > best[cid]["score"]:
             best[cid] = e
-    candidates = sorted(best.values(), key=lambda x: x["score"], reverse=True)
+    # Drop exact (source, page, text) duplicates too: identical text scores
+    # identically in the reranker and document-level dedupe would keep only
+    # one copy anyway, so reranking the copies is pure wasted compute.
+    uniq = {}
+    for e in best.values():
+        k = (e["source"], e["page"], e["text"])
+        if k not in uniq or e["score"] > uniq[k]["score"]:
+            uniq[k] = e
+    candidates = sorted(uniq.values(), key=lambda x: x["score"], reverse=True)
+    T.mark("merge")
 
     if not candidates:
+        T.emit()
         return RAGResponse(status="REFUSE", query=query, answer="No evidence found in database.")
 
     # 4. Rerank
     evidence = rerank_module.rerank(query, candidates, top_k=config.RERANK_TOP_K)
+    T.mark("reranking")
 
     # 5. Validate
     decision = validator.validate(intent_res, evidence)
+    T.mark("validation")
 
     # Format sources for frontend
     sources = [{"source": e['source'].split('/')[-1], "page": e['page'], "score": e['rerank_confidence']} for e in evidence]
@@ -201,6 +260,7 @@ async def ask_question(req: QueryRequest):
             "sources": sources
         }
         cache_manager.save_to_cache(query, resp_data)
+        T.emit()
         return RAGResponse(**resp_data)
 
     if decision["action"] == config.ACTION_CLARIFY:
@@ -216,11 +276,13 @@ async def ask_question(req: QueryRequest):
             "sources": sources
         }
         # Don't cache clarifications usually, or cache if you want
+        T.emit()
         return RAGResponse(**resp_data)
 
     # 7. LLM Generation (ANSWER)
     final_answer = llm_module.generate_answer(query, evidence, decision, extracted)
-    
+    T.mark("llm")
+
     # Parse follow-ups if the LLM generated them
     main_answer, follow_ups = _parse_follow_ups(final_answer)
 
@@ -235,6 +297,7 @@ async def ask_question(req: QueryRequest):
         "follow_ups": follow_ups,
         "sources": sources
     }
-    
+
     cache_manager.save_to_cache(query, resp_data)
+    T.emit()
     return RAGResponse(**resp_data)

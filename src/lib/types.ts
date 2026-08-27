@@ -39,14 +39,42 @@ export interface Conversation {
   messages?: Message[];
 }
 
+// ---- ADTU RAG backend contract (POST /ask) ----
+export type RagStatus = 'ANSWER' | 'CLARIFY' | 'REFUSE';
+
+export interface RagSource {
+  source: string;
+  page: number;
+  score: number;
+}
+
+export interface RagResponse {
+  status: RagStatus;
+  query: string;
+  intent: string;
+  entities: {
+    programs?: string[];
+    semesters?: string[];
+    years?: string[];
+    [key: string]: unknown;
+  };
+  confidence_score: number;
+  confidence_label: 'HIGH' | 'MEDIUM' | 'LOW';
+  answer: string | null;
+  clarification_question: string | null;
+  // REFUSE responses return follow_ups: null (not []) — tolerate both
+  follow_ups: string[] | null;
+  sources: RagSource[];
+}
+
 export interface MessageSource {
-  id: number;
-  documentId: number;
+  id?: number;
+  documentId?: number;
   documentName: string;
   pageNumber: number;
   lineStart?: number | null;
   lineEnd?: number | null;
-  snippet: string;
+  snippet?: string | null;
   retrievalScore: number;
 }
 
@@ -61,6 +89,10 @@ export interface Message {
   sources?: MessageSource[] | null;
   followUpQuestions?: string[] | null;
   clarificationOptions?: string[] | null;
+  // RAG metadata — in-memory only for v1 (not persisted in the messages table)
+  status?: RagStatus;
+  intent?: string;
+  confidenceScore?: number | null;
   createdAt: string;
 }
 

@@ -1,46 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
-import { db, documentsTable, categoriesTable } from "@/lib/db";
-
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const docId = parseInt(params.id);
-
-  if (!db) {
-    return NextResponse.json({
-      id: docId,
-      categoryId: 1,
-      categoryName: "Admissions & Eligibility",
-      title: `University Document #${docId}`,
-      description: "Official university handbook document.",
-      pageCount: 20,
-      createdAt: new Date().toISOString(),
-    });
-  }
-
-  try {
-    const [doc] = await db
-      .select({
-        id: documentsTable.id,
-        categoryId: documentsTable.categoryId,
-        categoryName: categoriesTable.name,
-        title: documentsTable.title,
-        description: documentsTable.description,
-        pageCount: documentsTable.pageCount,
-        createdAt: documentsTable.createdAt,
-      })
-      .from(documentsTable)
-      .leftJoin(categoriesTable, eq(categoriesTable.id, documentsTable.categoryId))
-      .where(eq(documentsTable.id, docId));
-
-    if (!doc) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(doc);
-  } catch (error) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
+import { connectToDatabase } from "@/lib/mongodb";
+import { Category, KnowledgeDocument } from "@/lib/models";
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+  const id = Number(params.id); if (!Number.isInteger(id)) return NextResponse.json({ error: "Invalid document id" }, { status: 400 });
+  try { await connectToDatabase(); const document = await KnowledgeDocument.findOne({ id }).lean(); if (!document) return NextResponse.json({ error: "Document not found" }, { status: 404 }); const category = document.categoryId == null ? null : await Category.findOne({ id: document.categoryId }).lean(); return NextResponse.json({ id: document.id, categoryId: document.categoryId, categoryName: category?.name ?? null, title: document.title, description: document.description, pageCount: document.pageCount, createdAt: document.createdAt }); }
+  catch (error) { console.error("Failed to get document:", error); return NextResponse.json({ error: "Database unavailable" }, { status: 503 }); }
 }

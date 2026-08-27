@@ -47,6 +47,22 @@ def embed_texts(texts: list) -> np.ndarray:
     return np.asarray(out, dtype=np.float32)
 
 
+# Recent-query vector memo. Within one request the SAME query string is
+# embedded for intent detection and again for every Milvus search call (3-4x).
+# BGE-M3 is deterministic, so the identical string always maps to the identical
+# vector — cache it instead of re-running ~0.2 s of CPU encode each time.
+# Callers treat the returned array as read-only.
+_QUERY_VEC_CACHE: dict = {}
+_QUERY_VEC_CACHE_MAX = 8  # keep only the most recent queries (~32 KB total)
+
+
 def embed_query(query: str) -> np.ndarray:
-    """(1024,) float32, L2-normalized."""
-    return embed_texts([query])[0]
+    """(1024,) float32, L2-normalized. Memoized per query string."""
+    vec = _QUERY_VEC_CACHE.get(query)
+    if vec is not None:
+        return vec
+    if len(_QUERY_VEC_CACHE) >= _QUERY_VEC_CACHE_MAX:
+        _QUERY_VEC_CACHE.clear()
+    vec = embed_texts([query])[0]
+    _QUERY_VEC_CACHE[query] = vec
+    return vec

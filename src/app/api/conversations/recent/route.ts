@@ -1,43 +1,14 @@
 import { NextResponse } from "next/server";
-import { eq, desc, sql } from "drizzle-orm";
-import { db, conversationsTable, messagesTable } from "@/lib/db";
+import { connectToDatabase } from "@/lib/mongodb";
+import { Conversation, Message } from "@/lib/models";
 
-export const dynamic = 'force-dynamic';
-
-const mockRecent = [
-  {
-    id: 1,
-    title: "Computer Science Eligibility & Fees",
-    categoryId: 1,
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    messageCount: 4,
-  },
-];
-
+export const dynamic = "force-dynamic";
 export async function GET() {
-  if (!db) {
-    return NextResponse.json(mockRecent);
-  }
-
   try {
-    const conversations = await db
-      .select({
-        id: conversationsTable.id,
-        title: conversationsTable.title,
-        categoryId: conversationsTable.categoryId,
-        createdAt: conversationsTable.createdAt,
-        updatedAt: conversationsTable.updatedAt,
-        messageCount: sql<number>`cast(count(${messagesTable.id}) as integer)`,
-      })
-      .from(conversationsTable)
-      .leftJoin(messagesTable, eq(messagesTable.conversationId, conversationsTable.id))
-      .groupBy(conversationsTable.id)
-      .orderBy(desc(conversationsTable.updatedAt))
-      .limit(5);
-
-    return NextResponse.json(conversations.length > 0 ? conversations : mockRecent);
-  } catch (error) {
-    return NextResponse.json(mockRecent);
-  }
+    await connectToDatabase();
+    const conversations = await Conversation.find().sort({ updatedAt: -1 }).limit(5).lean();
+    const counts = await Message.aggregate([{ $match: { conversationId: { $in: conversations.map((item) => item.id) } } }, { $group: { _id: "$conversationId", count: { $sum: 1 } } }]);
+    const byId = new Map(counts.map((item) => [item._id as number, item.count as number]));
+    return NextResponse.json(conversations.map((item) => ({ id: item.id, title: item.title, categoryId: item.categoryId, createdAt: item.createdAt, updatedAt: item.updatedAt, messageCount: byId.get(item.id) ?? 0 })));
+  } catch (error) { console.error("Failed to get recent conversations:", error); return NextResponse.json({ error: "Database unavailable" }, { status: 503 }); }
 }

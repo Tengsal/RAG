@@ -8,6 +8,7 @@ if a Redis server is not running. This guarantees speed without setup headaches.
 import json
 import hashlib
 import logging
+import socket
 import config
 
 log = logging.getLogger(__name__)
@@ -15,12 +16,40 @@ log = logging.getLogger(__name__)
 _redis_client = None
 _memory_cache = None
 
+def _redis_reachable() -> bool:
+    """Fast TCP pre-flight so a dead Redis never blocks a request.
+
+    redis-py's own connect timeout did not reliably cap the OS-level SYN
+    timeout on this dev machine (measured ~26 s). A raw socket with an
+    explicit timeout fails in ~1-2 s. localhost may resolve to several
+    addresses, so worst case ≈ timeout * number of addresses.
+    """
+    try:
+        with socket.create_connection(
+            (config.REDIS_HOST, config.REDIS_PORT),
+            timeout=config.REDIS_CONNECT_TIMEOUT,
+        ):
+            return True
+    except OSError:
+        return False
+
 def _get_redis():
     global _redis_client
     if _redis_client is None:
+        # Pre-flight the TCP connect ourselves; skip redis-py entirely when
+        # nothing is listening, and fall back to the in-memory cache now.
+        if not _redis_reachable():
+            log.warning("⚠️ Redis not reachable at %s:%s. Falling back to in-memory cache.",
+                        config.REDIS_HOST, config.REDIS_PORT)
+            _redis_client = False # Mark as failed so we don't keep trying
+            return False
         try:
             import redis
-            _redis_client = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, decode_responses=True)
+            _redis_client = redis.Redis(
+                host=config.REDIS_HOST, port=config.REDIS_PORT, decode_responses=True,
+                socket_connect_timeout=config.REDIS_CONNECT_TIMEOUT,
+                socket_timeout=config.REDIS_SOCKET_TIMEOUT,
+            )
             _redis_client.ping() # Test connection
             log.info("✅ Connected to Redis cache.")
         except Exception as e:

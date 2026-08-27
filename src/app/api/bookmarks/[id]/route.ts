@@ -1,31 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
-import { db, bookmarksTable } from "@/lib/db";
-
-export const dynamic = 'force-dynamic';
-
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const bookmarkId = parseInt(params.id);
-
-  if (!db) {
-    return new NextResponse(null, { status: 204 });
-  }
-
-  try {
-    const [deleted] = await db
-      .delete(bookmarksTable)
-      .where(eq(bookmarksTable.id, bookmarkId))
-      .returning();
-
-    if (!deleted) {
-      return NextResponse.json({ error: "Bookmark not found" }, { status: 404 });
-    }
-
-    return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    return new NextResponse(null, { status: 204 });
-  }
+import { connectToDatabase } from "@/lib/mongodb";
+import { Bookmark } from "@/lib/models";
+export const dynamic = "force-dynamic";
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  const id = Number(params.id);
+  if (!Number.isInteger(id)) return NextResponse.json({ error: "Invalid bookmark id" }, { status: 400 });
+  try { await connectToDatabase(); if (!await Bookmark.findOneAndDelete({ id }).lean()) return NextResponse.json({ error: "Bookmark not found" }, { status: 404 }); return new NextResponse(null, { status: 204 }); }
+  catch (error) { console.error("Failed to delete bookmark:", error); return NextResponse.json({ error: "Database unavailable" }, { status: 503 }); }
 }

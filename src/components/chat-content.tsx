@@ -67,6 +67,7 @@ export function ChatContent({ conversationId }: { conversationId?: number | null
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [pendingUserMessage, setPendingUserMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
@@ -110,6 +111,10 @@ export function ChatContent({ conversationId }: { conversationId?: number | null
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 
+    // Echo the user message immediately; it stays visible until the
+    // conversation query refetch returns the persisted messages.
+    setPendingUserMessage(content);
+
     try {
       if (!conversationId) {
         const newConv = await createConversation.mutateAsync({
@@ -121,19 +126,25 @@ export function ChatContent({ conversationId }: { conversationId?: number | null
           data: { content },
         });
 
+        await queryClient.invalidateQueries({ queryKey: ['/api/conversations/recent'] });
+        setPendingUserMessage(null);
+
         router.push(`/chat/${newConv.id}`);
-        queryClient.invalidateQueries({ queryKey: ['/api/conversations/recent'] });
       } else {
         await sendMessageMutation.mutateAsync({
           conversationId,
           data: { content },
         });
-        queryClient.invalidateQueries({ queryKey: [`/api/conversations/${conversationId}`] });
+        await queryClient.invalidateQueries({ queryKey: [`/api/conversations/${conversationId}`] });
+        setPendingUserMessage(null);
       }
 
       setMessage('');
     } catch (error) {
       console.error('Failed to send message:', error);
+      // Don't lose the user's text if the send failed
+      setPendingUserMessage(null);
+      setMessage(content);
     }
   };
 
@@ -567,6 +578,17 @@ export function ChatContent({ conversationId }: { conversationId?: number | null
               </div>
             )}
 
+            {pendingUserMessage && (
+              <MessageCard
+                message={{
+                  id: -1,
+                  conversationId: conversationId ?? 0,
+                  role: 'user',
+                  content: pendingUserMessage,
+                  createdAt: new Date().toISOString(),
+                }}
+              />
+            )}
             {sendMessageMutation.isPending && <AILoadingIndicator />}
             <div ref={messagesEndRef} />
           </div>

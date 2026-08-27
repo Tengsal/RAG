@@ -1,123 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq, sql } from "drizzle-orm";
-import { db, conversationsTable, messagesTable, bookmarksTable } from "@/lib/db";
+import { connectToDatabase } from "@/lib/mongodb";
+import { Bookmark, Conversation, Message } from "@/lib/models";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+const asConversation = (item: any) => ({ id: item.id, title: item.title, categoryId: item.categoryId, createdAt: item.createdAt, updatedAt: item.updatedAt });
+const asMessage = (item: any) => ({ id: item.id, conversationId: item.conversationId, role: item.role, content: item.content, confidence: item.confidence ?? null, sources: item.sources ?? null, followUpQuestions: item.followUpQuestions ?? null, clarificationOptions: item.clarificationOptions ?? null, createdAt: item.createdAt });
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const convoId = parseInt(params.id);
-
-  if (!db) {
-    return NextResponse.json({
-      id: convoId,
-      title: "Academic Query",
-      categoryId: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      messages: [
-        {
-          id: 1,
-          conversationId: convoId,
-          role: "assistant",
-          content: "Hello! How can I assist you with university admissions, fees, or academic regulations today?",
-          confidence: "high",
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    });
-  }
-
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+  const id = Number(params.id);
+  if (!Number.isInteger(id)) return NextResponse.json({ error: "Invalid conversation id" }, { status: 400 });
   try {
-    const [convo] = await db
-      .select()
-      .from(conversationsTable)
-      .where(eq(conversationsTable.id, convoId));
-
-    if (!convo) {
-      return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
-    }
-
-    const messages = await db
-      .select()
-      .from(messagesTable)
-      .where(eq(messagesTable.conversationId, convoId))
-      .orderBy(messagesTable.createdAt);
-
-    return NextResponse.json({ ...convo, messages });
-  } catch (error) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
+    await connectToDatabase();
+    const conversation = await Conversation.findOne({ id }).lean();
+    if (!conversation) return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    const messages = await Message.find({ conversationId: id }).sort({ createdAt: 1, id: 1 }).lean();
+    return NextResponse.json({ ...asConversation(conversation), messages: messages.map(asMessage) });
+  } catch (error) { console.error("Failed to get conversation:", error); return NextResponse.json({ error: "Database unavailable" }, { status: 503 }); }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const convoId = parseInt(params.id);
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const id = Number(params.id);
   const body = await request.json();
-
-  if (!db) {
-    return NextResponse.json({
-      id: convoId,
-      title: body.title || "Updated Title",
-      updatedAt: new Date().toISOString(),
-      messageCount: 1,
-    });
-  }
-
+  if (!Number.isInteger(id)) return NextResponse.json({ error: "Invalid conversation id" }, { status: 400 });
   try {
-    const updateData: Partial<typeof conversationsTable.$inferInsert> = {};
-    if (body.title !== undefined) updateData.title = body.title;
-    if (body.categoryId !== undefined) updateData.categoryId = body.categoryId ?? null;
-
-    const [convo] = await db
-      .update(conversationsTable)
-      .set(updateData)
-      .where(eq(conversationsTable.id, convoId))
-      .returning();
-
-    if (!convo) {
-      return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
-    }
-
-    const [{ messageCount }] = await db
-      .select({ messageCount: sql<number>`cast(count(*) as integer)` })
-      .from(messagesTable)
-      .where(eq(messagesTable.conversationId, convo.id));
-
-    return NextResponse.json({ ...convo, messageCount });
-  } catch (error) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
+    await connectToDatabase();
+    const set: Record<string, unknown> = { updatedAt: new Date() };
+    if (body.title !== undefined) set.title = body.title;
+    if (body.categoryId !== undefined) set.categoryId = body.categoryId ?? null;
+    const conversation = await Conversation.findOneAndUpdate({ id }, { $set: set }, { new: true }).lean();
+    if (!conversation) return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    return NextResponse.json({ ...asConversation(conversation), messageCount: await Message.countDocuments({ conversationId: id }) });
+  } catch (error) { console.error("Failed to update conversation:", error); return NextResponse.json({ error: "Database unavailable" }, { status: 503 }); }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const convoId = parseInt(params.id);
-
-  if (!db) {
-    return new NextResponse(null, { status: 204 });
-  }
-
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  const id = Number(params.id);
+  if (!Number.isInteger(id)) return NextResponse.json({ error: "Invalid conversation id" }, { status: 400 });
   try {
-    await db.delete(messagesTable).where(eq(messagesTable.conversationId, convoId));
-    await db.delete(bookmarksTable).where(eq(bookmarksTable.conversationId, convoId));
-    const [deleted] = await db
-      .delete(conversationsTable)
-      .where(eq(conversationsTable.id, convoId))
-      .returning();
-
-    if (!deleted) {
-      return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
-    }
-
+    await connectToDatabase();
+    const deleted = await Conversation.findOneAndDelete({ id }).lean();
+    if (!deleted) return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    await Promise.all([Message.deleteMany({ conversationId: id }), Bookmark.deleteMany({ conversationId: id })]);
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    return new NextResponse(null, { status: 204 });
-  }
+  } catch (error) { console.error("Failed to delete conversation:", error); return NextResponse.json({ error: "Database unavailable" }, { status: 503 }); }
 }

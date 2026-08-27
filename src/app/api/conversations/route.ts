@@ -1,110 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq, desc, sql } from "drizzle-orm";
-import { db, conversationsTable, messagesTable } from "@/lib/db";
+import { connectToDatabase } from "@/lib/mongodb";
+import { Conversation, Message, nextId } from "@/lib/models";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-// Memory storage fallback
-let memoryConversations: Array<any> = [
-  {
-    id: 1,
-    title: "Computer Science Eligibility & Fees",
-    categoryId: 1,
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    messageCount: 4,
-    messages: [
-      {
-        id: 1,
-        conversationId: 1,
-        role: "user",
-        content: "What are the admission requirements for Computer Science?",
-        createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-      },
-      {
-        id: 2,
-        conversationId: 1,
-        role: "assistant",
-        content: "## Admission Requirements for B.Tech Computer Science\n\n- Minimum 60% aggregate in 10+2 with Physics, Chemistry, and Mathematics.\n- Valid score in University Entrance Examination or JEE Main.\n- Submission of Class X & XII mark sheets, entrance scorecard, and identity proof.",
-        confidence: "high",
-        sources: [
-          {
-            id: 1,
-            documentId: 1,
-            documentName: "Undergraduate Prospectus 2024-25",
-            pageNumber: 12,
-            lineStart: 40,
-            lineEnd: 55,
-            snippet: "B.Tech CS candidates must possess 60%+ in aggregate with PCM and clear JEE/University entrance exam.",
-            retrievalScore: 0.94,
-          },
-        ],
-        followUpQuestions: [
-          "What is the fee structure for this course?",
-          "Are scholarships available for CS students?",
-        ],
-        createdAt: new Date(Date.now() - 3600000 * 2 + 1000).toISOString(),
-      },
-    ],
-  },
-];
+const asConversation = (conversation: { id: number; title: string; categoryId: number | null; createdAt: Date; updatedAt: Date }, messageCount = 0) => ({
+  id: conversation.id, title: conversation.title, categoryId: conversation.categoryId,
+  createdAt: conversation.createdAt, updatedAt: conversation.updatedAt, messageCount,
+});
 
 export async function GET() {
-  if (!db) {
-    return NextResponse.json(memoryConversations);
-  }
-
   try {
-    const conversations = await db
-      .select({
-        id: conversationsTable.id,
-        title: conversationsTable.title,
-        categoryId: conversationsTable.categoryId,
-        createdAt: conversationsTable.createdAt,
-        updatedAt: conversationsTable.updatedAt,
-        messageCount: sql<number>`cast(count(${messagesTable.id}) as integer)`,
-      })
-      .from(conversationsTable)
-      .leftJoin(messagesTable, eq(messagesTable.conversationId, conversationsTable.id))
-      .groupBy(conversationsTable.id)
-      .orderBy(desc(conversationsTable.updatedAt));
-
-    return NextResponse.json(conversations.length > 0 ? conversations : memoryConversations);
+    await connectToDatabase();
+    const conversations = await Conversation.find().sort({ updatedAt: -1 }).lean();
+    const counts = await Message.aggregate([{ $match: { conversationId: { $in: conversations.map((item) => item.id) } } }, { $group: { _id: "$conversationId", count: { $sum: 1 } } }]);
+    const countById = new Map(counts.map((item) => [item._id as number, item.count as number]));
+    return NextResponse.json(conversations.map((item) => asConversation(item, countById.get(item.id) ?? 0)));
   } catch (error) {
-    return NextResponse.json(memoryConversations);
+    console.error("Failed to list conversations:", error);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { title, categoryId } = body;
-
-    if (!title) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
-    }
-
-    if (!db) {
-      const newConvo = {
-        id: Date.now(),
-        title,
-        categoryId: categoryId ?? null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        messageCount: 0,
-        messages: [],
-      };
-      memoryConversations.unshift(newConvo);
-      return NextResponse.json(newConvo, { status: 201 });
-    }
-
-    const [convo] = await db
-      .insert(conversationsTable)
-      .values({ title, categoryId: categoryId ?? null })
-      .returning();
-
-    return NextResponse.json({ ...convo, messageCount: 0, messages: [] }, { status: 201 });
+    const { title, categoryId } = await request.json();
+    if (!title) return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    await connectToDatabase();
+    const conversation = await Conversation.create({ id: await nextId("conversations"), title, categoryId: categoryId ?? null });
+    return NextResponse.json({ ...asConversation(conversation, 0), messages: [] }, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("Failed to create conversation:", error);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
   }
 }
