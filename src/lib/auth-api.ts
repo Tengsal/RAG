@@ -26,7 +26,7 @@ export interface LoginDTO {
   password: string;
 }
 
-const AUTH_SERVER_URL = process.env.NEXT_PUBLIC_AUTH_SERVER_URL || 'http://localhost:5000';
+const AUTH_SERVER_URL = process.env.NEXT_PUBLIC_AUTH_SERVER_URL || 'http://localhost:5100';
 
 export async function registerUser(data: RegisterDTO): Promise<AuthApiResponse> {
   const res = await fetch(`${AUTH_SERVER_URL}/auth/register`, {

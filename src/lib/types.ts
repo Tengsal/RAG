@@ -46,6 +46,10 @@ export interface RagSource {
   source: string;
   page: number;
   score: number;
+  // Full chunk text + corpus folder, shipped by the backend for the
+  // client-side Evidence Explorer (no extra model calls involved).
+  text?: string;
+  category?: string;
 }
 
 export interface RagResponse {
@@ -75,6 +79,9 @@ export interface MessageSource {
   lineStart?: number | null;
   lineEnd?: number | null;
   snippet?: string | null;
+  // Full chunk text + corpus folder for the Evidence Explorer sheet.
+  text?: string | null;
+  category?: string | null;
   retrievalScore: number;
 }
 

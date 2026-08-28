@@ -2,10 +2,21 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Message } from '@/lib/types';
+import { Message, MessageSource } from '@/lib/types';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { queryHighlightTerms, splitHighlightedText } from '@/lib/highlight';
 
 interface MessageCardProps {
   message: Message;
+  // The user's question that produced this answer — used to keyword-highlight
+  // matching terms in the Evidence Explorer sheet (client-side only).
+  query?: string;
   onFollowUpClick?: (question: string) => void;
   onClarificationClick?: (option: string) => void;
 }
@@ -22,11 +33,11 @@ const executionPipelineNodes = [
   { name: 'Verified Answer', icon: 'task_alt' },
 ];
 
-export function MessageCard({ message, onFollowUpClick, onClarificationClick }: MessageCardProps) {
+export function MessageCard({ message, query, onFollowUpClick, onClarificationClick }: MessageCardProps) {
   const [showSources, setShowSources] = useState(true);
-  const [showEvidenceExplorer, setShowEvidenceExplorer] = useState(false);
   const [showPipelineTrace, setShowPipelineTrace] = useState(false);
   const [highlightedSource, setHighlightedSource] = useState<string | null>(null);
+  const [sheetSource, setSheetSource] = useState<MessageSource | null>(null);
   const sourceRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const isUser = message.role === 'user';
 
@@ -55,11 +66,36 @@ export function MessageCard({ message, onFollowUpClick, onClarificationClick }: 
     message.confidenceScore != null
       ? `${Math.round(message.confidenceScore * 100)}%`
       : (message.confidence ?? '').toUpperCase();
-  const topSourceScore = message.sources?.length
-    ? Math.max(...message.sources.map((s) => s.retrievalScore))
-    : null;
-
   const basename = (path: string) => (path || '').split('/').pop() || path;
+
+  // Renders the full chunk with the query's keywords highlighted. Pure
+  // client-side keyword overlap — no model calls, so opening the sheet is
+  // instant and never changes the evidence itself.
+  const renderHighlightedText = (source: MessageSource) => {
+    if (!source.text) {
+      return (
+        <p className="text-[#777586] italic">
+          Full text not available for this source.
+        </p>
+      );
+    }
+    const terms = queryHighlightTerms(query ?? '');
+    if (terms.length === 0) {
+      return source.text;
+    }
+    return splitHighlightedText(source.text, terms).map((segment, idx) =>
+      segment.isMatch ? (
+        <mark
+          key={idx}
+          className="bg-yellow-200 text-gray-900 rounded-sm px-0.5"
+        >
+          {segment.text}
+        </mark>
+      ) : (
+        <React.Fragment key={idx}>{segment.text}</React.Fragment>
+      )
+    );
+  };
 
   const handleCitationClick = (sourceKey: string) => {
     setShowSources(true);
@@ -101,6 +137,7 @@ export function MessageCard({ message, onFollowUpClick, onClarificationClick }: 
   };
 
   return (
+    <>
     <div className="flex gap-4 max-w-[95%] sm:max-w-[88%] ml-auto flex-row-reverse my-5" data-testid={`message-${message.id}`}>
       <div className="w-8.5 h-8.5 rounded-full bg-[#4441cc] shrink-0 flex items-center justify-center text-white shadow-md">
         <span className="material-symbols-outlined text-[18px]">bolt</span>
@@ -183,11 +220,11 @@ export function MessageCard({ message, onFollowUpClick, onClarificationClick }: 
               </button>
 
               <button
-                onClick={() => setShowEvidenceExplorer(!showEvidenceExplorer)}
+                onClick={() => message.sources?.length && setSheetSource(message.sources[0])}
                 className="text-xs font-bold text-[#9026c3] hover:underline flex items-center gap-1"
               >
                 <span className="material-symbols-outlined text-sm">search_insights</span>
-                <span>{showEvidenceExplorer ? 'Close Explorer' : 'Evidence Explorer'}</span>
+                <span>Evidence Explorer</span>
               </button>
             </div>
 
@@ -200,11 +237,12 @@ export function MessageCard({ message, onFollowUpClick, onClarificationClick }: 
                     <div
                       key={source.id ?? sourceKey}
                       ref={(el) => { sourceRefs.current[sourceKey] = el; }}
+                      onClick={() => setSheetSource(source)}
                       className={`p-3 rounded-xl bg-white border space-y-1 transition-colors group cursor-pointer ${
                         isHighlighted
                           ? 'border-[#4441cc] ring-2 ring-[#4441cc]/30 bg-[#dae2fd]/40'
                           : 'border-[#c7c4d7]/60 hover:border-[#4441cc]'
-                      }`}
+                      } hover:ring-2 hover:ring-[#4441cc]/20`}
                     >
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-xs font-bold text-[#1a1c1c] group-hover:text-[#4441cc] transition-colors truncate">
@@ -216,6 +254,9 @@ export function MessageCard({ message, onFollowUpClick, onClarificationClick }: 
                           </span>
                           <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#4441cc]/10 text-[#4441cc]">
                             Pg {source.pageNumber}
+                          </span>
+                          <span className="material-symbols-outlined text-xs text-[#777586] group-hover:text-[#4441cc] transition-colors">
+                            open_in_new
                           </span>
                         </span>
                       </div>
@@ -229,40 +270,6 @@ export function MessageCard({ message, onFollowUpClick, onClarificationClick }: 
                 })}
               </div>
             )}
-
-            {/* Signature Evidence Explorer Drawer */}
-            <AnimatePresence>
-              {showEvidenceExplorer && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden pt-2"
-                >
-                  <div className="p-4 rounded-2xl bg-[#f3f3f4] border border-[#c7c4d7] space-y-2 text-xs">
-                    <h4 className="font-bold text-[#1a1c1c] flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[#4441cc] text-base">analytics</span>
-                      <span>Vector Relevance & Reranker Diagnostics</span>
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
-                      <div className="p-2 rounded bg-white border border-[#c7c4d7]/40">
-                        <span className="text-[#464554] font-semibold block">Top Source Score:</span>
-                        <span className="font-mono font-bold text-[#4441cc]">
-                          {topSourceScore != null ? topSourceScore.toFixed(3) : '—'}
-                        </span>
-                      </div>
-                      <div className="p-2 rounded bg-white border border-[#c7c4d7]/40">
-                        <span className="text-[#464554] font-semibold block">Evidence Chunks Used:</span>
-                        <span className="font-mono font-bold text-[#9026c3]">
-                          {message.sources?.length ?? 0}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         )}
 
@@ -306,5 +313,26 @@ export function MessageCard({ message, onFollowUpClick, onClarificationClick }: 
         )}
       </div>
     </div>
+
+    {/* Evidence Explorer Sheet: full chunk text with the query's keywords
+        highlighted client-side. Opening it costs no backend/model round-trip
+        — the text is already in the message payload. */}
+    <Sheet open={!!sheetSource} onOpenChange={(open) => !open && setSheetSource(null)}>
+      <SheetContent side="right" className="w-full sm:max-w-xl">
+        <SheetHeader>
+          <SheetTitle className="font-mono text-sm truncate">
+            {sheetSource
+              ? `${basename(sheetSource.documentName)} — Page ${sheetSource.pageNumber}`
+              : ''}
+          </SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="h-[calc(100vh-5rem)] pr-4">
+          <div className="text-sm leading-relaxed whitespace-pre-wrap text-[#1a1c1c]">
+            {sheetSource ? renderHighlightedText(sheetSource) : null}
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+    </>
   );
 }

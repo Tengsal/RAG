@@ -15,28 +15,32 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (!isAuthenticated || !user) {
-      // Direct unauthenticated users to the correct login page
-      if (pathname.startsWith('/admin')) {
-        router.replace(`/admin/login?redirect=${encodeURIComponent(pathname)}`);
-      } else {
-        router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
-      }
-      return;
-    }
-
-    if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-      // Role unauthorized: redirect user to chat, or admin to admin portal
-      if (user.role === 'user') {
-        router.replace('/chat');
-      } else {
-        router.replace('/admin');
-      }
-    }
-  }, [isAuthenticated, user, isLoading, allowedRoles, router, pathname]);
+  // TEMPORARY AUTH BYPASS (dev only): the login redirect is disabled so the
+  // chat can be used without signing in. Un-comment this effect to restore
+  // login gating. REVERT before deploying.
+  //
+  // useEffect(() => {
+  //   if (isLoading) return;
+  //
+  //   if (!isAuthenticated || !user) {
+  //     // Direct unauthenticated users to the correct login page
+  //     if (pathname.startsWith('/admin')) {
+  //       router.replace(`/admin/login?redirect=${encodeURIComponent(pathname)}`);
+  //     } else {
+  //       router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+  //     }
+  //     return;
+  //   }
+  //
+  //   if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+  //     // Role unauthorized: redirect user to chat, or admin to admin portal
+  //     if (user.role === 'user') {
+  //       router.replace('/chat');
+  //     } else {
+  //       router.replace('/admin');
+  //     }
+  //   }
+  // }, [isAuthenticated, user, isLoading, allowedRoles, router, pathname]);
 
   if (isLoading) {
     return (
@@ -49,8 +53,14 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     );
   }
 
+  // TEMPORARY AUTH BYPASS (dev only): render children on /chat even when not
+  // logged in (chat UI is null-safe without a user). /admin still requires a
+  // session because its pages dereference user.role. REVERT before deploying.
   if (!isAuthenticated || !user) {
-    return null;
+    if (pathname.startsWith('/admin')) {
+      return null;
+    }
+    return <>{children}</>;
   }
 
   if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {

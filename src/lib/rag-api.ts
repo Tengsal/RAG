@@ -22,9 +22,10 @@ function basename(path: string): string {
   return path.split('/').pop() || path;
 }
 
-// Backend sources only carry {source, page, score} — fill the remaining
-// MessageSource fields so the payload stays compatible with the jsonb shape
-// persisted in the messages table.
+// Backend sources carry {source, page, score, text, category} — fill the
+// remaining MessageSource fields so the payload stays compatible with the
+// persisted messages shape. text/category power the Evidence Explorer sheet
+// (full chunk + keyword highlighting, all client-side).
 export function mapRagSources(sources: RagSource[]): MessageSource[] {
   return sources.map((s, idx) => ({
     id: idx + 1,
@@ -34,6 +35,8 @@ export function mapRagSources(sources: RagSource[]): MessageSource[] {
     lineStart: null,
     lineEnd: null,
     snippet: '',
+    text: s.text ?? null,
+    category: s.category ?? null,
     retrievalScore: s.score,
   }));
 }

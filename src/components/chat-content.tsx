@@ -535,14 +535,22 @@ export function ChatContent({ conversationId }: { conversationId?: number | null
               </div>
             ) : hasMessages ? (
               <div className="space-y-5">
-                {conversation.messages!.map((msg) => (
-                  <MessageCard
-                    key={msg.id}
-                    message={msg}
-                    onFollowUpClick={(q) => handleSendMessage(q)}
-                    onClarificationClick={(opt) => handleSendMessage(opt)}
-                  />
-                ))}
+                {conversation.messages!.map((msg, idx) => {
+                  // The assistant's answer belongs to the user question
+                  // directly before it — that's what the Evidence Explorer
+                  // highlights against.
+                  const previous = idx > 0 ? conversation.messages![idx - 1] : undefined;
+                  const query = previous && previous.role === 'user' ? previous.content : undefined;
+                  return (
+                    <MessageCard
+                      key={msg.id}
+                      message={msg}
+                      query={query}
+                      onFollowUpClick={(q) => handleSendMessage(q)}
+                      onClarificationClick={(opt) => handleSendMessage(opt)}
+                    />
+                  );
+                })}
               </div>
             ) : (
               /* Tight Welcome Layout: Heading → Suggestions → Search */

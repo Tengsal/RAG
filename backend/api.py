@@ -312,8 +312,11 @@ async def ask_question(req: QueryRequest):
     decision = validator.validate(intent_res, evidence)
     T.mark("validation")
 
-    # Format sources for frontend
-    sources = [{"source": e['source'].split('/')[-1], "page": e['page'], "score": e['rerank_confidence']} for e in evidence]
+    # Format sources for frontend. The full chunk text ships here (already in
+    # memory server-side, so this adds ~0 ms to /ask) and powers the client-side
+    # Evidence Explorer: keyword highlighting is done in the browser, never by
+    # an extra model pass.
+    sources = [{"source": e['source'].split('/')[-1], "page": e['page'], "score": e['rerank_confidence'], "text": e["text"], "category": e.get("category", "")} for e in evidence]
 
     # Map confidence label
     conf_score = decision['confidence']

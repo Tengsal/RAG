@@ -7,9 +7,14 @@ import adminRoutes from './routes/admin.routes';
 const app = express();
 
 // Middleware
+// FRONTEND_ORIGIN may be a comma-separated list. Passing it as one string
+// never matches, and the cors package must be the ONLY thing setting
+// Access-Control-Allow-Origin — with an origin array it echoes exactly the
+// one matching request origin per response (browsers reject multiple values).
+const allowedOrigins = env.FRONTEND_ORIGIN.split(',').map((o) => o.trim());
 app.use(
   cors({
-    origin: env.FRONTEND_ORIGIN,
+    origin: allowedOrigins,
     credentials: true,
   })
 );

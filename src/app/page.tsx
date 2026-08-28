@@ -27,13 +27,16 @@ export default function LandingPage() {
   const { user, isAuthenticated, logout } = useAuth();
 
   const handleTryAssistant = () => {
-    if (!isAuthenticated) {
-      router.push('/login?redirect=/chat');
-    } else if (user?.role === 'admin') {
-      router.push('/admin');
-    } else {
-      router.push('/chat');
-    }
+    // TEMPORARY AUTH BYPASS (dev only): "Ask Campus AI" goes straight to the
+    // chat, skipping the login redirect. REVERT before deploying.
+    router.push('/chat');
+    // if (!isAuthenticated) {
+    //   router.push('/login?redirect=/chat');
+    // } else if (user?.role === 'admin') {
+    //   router.push('/admin');
+    // } else {
+    //   router.push('/chat');
+    // }
   };
 
   // WebGL Shader Animation initialization from code.html
