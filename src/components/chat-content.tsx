@@ -232,6 +232,19 @@ export function ChatContent({ conversationId }: { conversationId?: number | null
           <button
             onClick={(e) => {
               e.stopPropagation();
+              handleDeleteConversation(conv.id);
+            }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#ba1a1a] hover:bg-[#ffdad6] transition-colors cursor-pointer"
+            title="Delete chat"
+            aria-label={`Delete ${conv.title}`}
+          >
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm4 2v8h2v-8h-2Zm4 0v8h2v-8h-2Z" />
+            </svg>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
               e.preventDefault();
               setOpenMenuId(isMenuOpen ? null : conv.id);
             }}
