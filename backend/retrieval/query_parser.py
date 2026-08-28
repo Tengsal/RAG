@@ -1,5 +1,4 @@
-"""
-LLM-based query parser for the university curriculum chatbot.
+"""LLM-based query parser for the university curriculum chatbot.
 
 Uses a local Ollama model (Qwen3) only for understanding the user's
 question. Actual facts are still retrieved from structured JSON data.
@@ -37,11 +36,6 @@ class LLMQueryParser:
             return regex_parse(query, self.valid_programmes)
 
     def _parse_with_timeout(self, query: str, timeout: float) -> Dict[str, Any]:
-        """Run the Ollama parse in a daemon thread and cap it at `timeout`.
-
-        A daemon thread (joined with a timeout, not awaited) means a slow
-        Ollama call cannot block the fallback path.
-        """
         holder: Dict[str, Any] = {}
 
         def _run():
@@ -65,9 +59,16 @@ class LLMQueryParser:
 Your ONLY job is to extract intent, programme, and semester from the user's query.
 
 RULES:
-1. VALID INTENTS: Choose exactly one: "subjects", "duration", "specializations", "internship", "info".
+1. VALID INTENTS: Choose exactly one: "subjects", "duration", "specializations", "internship", "administration", "scholarships", "attendance", "academic_calendar", "admissions", "student_services", "info".
+   - "administration": university leadership/staff (Vice Chancellor, president, dean, registrar, contacts, office hours).
+   - "scholarships": scholarships, waivers, financial aid.
+   - "attendance": attendance rules or minimum percentage.
+   - "academic_calendar": semester start/end dates, exam dates, calendar events.
+   - "admissions": admission process, required documents, eligibility.
+   - "student_services": hostel, library, transport, canteen, clubs.
 2. VALID PROGRAMMES: You may ONLY extract a programme if it is explicitly mentioned or clearly referenced in the query. Valid codes: "BCA", "B.Tech", "BBA", "BEMT", "BDTT", "BMLS", "B.Optom", "BPT", "B.Sc. Nursing", "P.B.B.Sc. Nursing", "B.Sc. Biotechnology", "B.Sc. Microbiology", "B.Sc. FST", "B.Sc. Forensic Science", "B.Tech Civil Engineering", "B.Tech Mechanical Engineering", "B.Tech CSE (Data Science & AI)", "BHMCT", "B.Pharm".
    - CRITICAL: If the user asks about a programme NOT in this list, or if no programme is mentioned, set "programme" to null. DO NOT guess or default to "BCA".
+   - University-level intents (administration, scholarships, attendance, academic_calendar, admissions, student_services) do NOT require a programme. Keep "programme" null unless one is explicitly mentioned.
 3. SEMESTER: An integer from 1 to 8. If the user does not explicitly mention a semester (e.g., "sem 1", "second semester"), set "semester" to null. DO NOT guess.
 4. OUTPUT: Return ONLY a valid JSON object. No markdown, no code blocks, no explanations.
 
@@ -80,6 +81,21 @@ Output: {"intent": "internship", "programme": "BPT", "semester": null}
 
 User: "how long is the nursing program?"
 Output: {"intent": "duration", "programme": "B.Sc. Nursing", "semester": null}
+
+User: "who is the vice chancellor?"
+Output: {"intent": "administration", "programme": null, "semester": null}
+
+User: "what scholarships are available?"
+Output: {"intent": "scholarships", "programme": null, "semester": null}
+
+User: "what is the attendance requirement?"
+Output: {"intent": "attendance", "programme": null, "semester": null}
+
+User: "when does the semester start?"
+Output: {"intent": "academic_calendar", "programme": null, "semester": null}
+
+User: "what documents are required for admission?"
+Output: {"intent": "admissions", "programme": null, "semester": null}
 
 User: "tell me about fees"
 Output: {"intent": "info", "programme": null, "semester": null}
@@ -114,8 +130,6 @@ _ORDINALS = {
     "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8,
 }
 
-# Shorthand -> canonical token, applied to the query text so that "btech",
-# "b.tech", "nursing", etc. all normalize to the same form used by the records.
 _ALIASES = {
     "btech": "b tech",
     "b.tech": "b tech",
@@ -150,7 +164,6 @@ def _match_programme(query: str, valid_programmes: List[str]) -> Optional[str]:
         q = re.sub(r"\b" + re.escape(alias) + r"\b", canonical, q)
     q = _normalize(q)
 
-    # Longest first so "B.Tech Civil Engineering" wins over "B.Tech".
     candidates = sorted(
         ((p, _normalize(p)) for p in valid_programmes),
         key=lambda x: -len(x[1]),
@@ -166,7 +179,20 @@ def regex_parse(query: str, valid_programmes: Optional[List[str]] = None) -> Dic
     extract a semester / intent with regex. Never guesses a programme."""
     q = _normalize(query)
 
-    if re.search(r"\b(syllabus|syllabi|subjects?|study|curriculum|courses?)\b", q):
+    # University-level intents first (they do not require a programme).
+    if re.search(r"\b(vice\s+chancellor|chancellor|president|registrar|dean|director|faculty|staff|administration|contact|email|phone|office\s+hours?)\b", q):
+        intent = "administration"
+    elif re.search(r"\b(scholarship|scholarships|waiver|concession|financial\s+aid)\b", q):
+        intent = "scholarships"
+    elif re.search(r"\battendance\b", q):
+        intent = "attendance"
+    elif re.search(r"\b(academic\s+calendar|semester\s+(start|begin|commence|dates?)|when\s+(does|do|will)\s+(the\s+)?(semester|classes?)\s+(start|begin|commence|resume)|classes\s+(start|begin))\b", q):
+        intent = "academic_calendar"
+    elif re.search(r"\b(admission|admissions|documents?\s+(required|needed)|required\s+documents?|apply|application|eligibility)\b", q):
+        intent = "admissions"
+    elif re.search(r"\b(hostel|library|transport|canteen|medical|sports|clubs?|student\s+services?)\b", q):
+        intent = "student_services"
+    elif re.search(r"\b(syllabus|syllabi|subjects?|study|curriculum|courses?)\b", q):
         intent = "subjects"
     elif re.search(r"\b(duration|how long|years?|long)\b", q):
         intent = "duration"

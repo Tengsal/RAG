@@ -27,7 +27,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (!await Conversation.exists({ id: conversationId })) return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
     let aiMessage: any;
     try {
-      aiMessage = mapRagToMessage(await askRag(content), conversationId, 0);
+      const ragData = await askRag(content);
+      console.log("[messages] RAG RESPONSE:", ragData);
+      aiMessage = mapRagToMessage(ragData, conversationId, 0);
     } catch (error) {
       console.error("[messages] RAG backend call failed:", error);
       aiMessage = { id: 0, conversationId, role: "assistant", content: "Sorry, I couldn't reach the university knowledge service right now. Please try again in a moment.", confidence: null, status: "REFUSE", intent: "error", confidenceScore: null, sources: null, followUpQuestions: null, clarificationOptions: null, createdAt: new Date() };

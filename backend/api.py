@@ -28,9 +28,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 try:  # Supports both `uvicorn api:app` from backend/ and `backend.api` from root.
-    from retrieval.structured_retriever import CurriculumQA, render_programme_record
+    from retrieval.structured_retriever import CurriculumQA, UNIVERSITY_INTENTS
 except ModuleNotFoundError:
-    from backend.retrieval.structured_retriever import CurriculumQA, render_programme_record
+    from backend.retrieval.structured_retriever import CurriculumQA, UNIVERSITY_INTENTS
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("adtu.api")
@@ -175,22 +175,18 @@ def ask(req: QueryRequest) -> dict:
         "years": [],
     }
 
-    if not programme:
-        # No programme identified -> ask which one.
+    if not programme and intent not in UNIVERSITY_INTENTS:
+        # Programme-specific question with no programme identified -> clarify.
         return _response(query=text, status="CLARIFY", intent=intent, entities=entities,
                          confidence_score=0.2, confidence_label="LOW", answer=None,
                          clarification_question=f"Which programme do you mean? Available: {', '.join(qa.retriever.valid_programme_codes)}",
                          sources=[], timings=timings)
 
-    if result["success"] and record:
-        # Programme identified and data found -> confident ANSWER with source.
-        source_name = qa.retriever.source_file(programme) or "curriculum.json"
+    if result["success"]:
+        # Programme and university-level answers both carry shared evidence.
         return _response(query=text, status="ANSWER", intent=intent, entities=entities,
                          confidence_score=0.95, confidence_label="HIGH", answer=result["answer"],
-                         clarification_question=None, sources=[{
-                             "source": source_name, "page": 1, "score": 1.0,
-                             "category": "curriculum", "text": render_programme_record(record),
-                         }], timings=timings)
+                         clarification_question=None, sources=result.get("sources", []), timings=timings)
 
     # Programme identified but no data for it -> honest REFUSE.
     return _response(query=text, status="REFUSE", intent=intent, entities=entities,
