@@ -1,0 +1,252 @@
+{
+  "document_type": "curriculum",
+
+  "programmes": [
+    {
+      "programme_name": "Bachelor of Science in Nursing",
+      "programme_code": "B.Sc. Nursing",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Anatomy", "Physiology", "Biochemistry", "Nursing Foundations", "Psychology", "Introduction to Nursing Education", "Communication & Educational Technology"] },
+        { "semester_number": 2, "subjects": ["Nutrition & Dietetics", "Sociology", "Nursing Foundations II", "Microbiology", "Pharmacology", "Health Assessment & Nursing Procedures"] },
+        { "semester_number": 3, "subjects": ["Medical-Surgical Nursing I", "Pharmacology & Pathology", "Community Health Nursing I", "Sociology & Psychology", "Nursing Research Fundamentals"] },
+        { "semester_number": 4, "subjects": ["Medical-Surgical Nursing II", "Pharmacology", "Community Health Nursing II", "Child Health Nursing", "Nursing Education & Administration"] },
+        { "semester_number": 5, "subjects": ["Child Health Nursing", "Mental Health Nursing", "Midwifery & Obstetrical Nursing", "Community Health Nursing", "Nursing Research & Statistics"] },
+        { "semester_number": 6, "subjects": ["Midwifery & Obstetrical Nursing II", "Mental Health Nursing II", "Medical-Surgical Nursing III", "Community Health Nursing", "Nursing Management"] },
+        { "semester_number": 7, "subjects": ["Nursing Management & Administration", "Nursing Education", "Advanced Medical-Surgical Nursing", "Community Health Nursing", "Clinical Practicum"] },
+        { "semester_number": 8, "subjects": ["Internship", "Community Health Nursing Practice", "Medical-Surgical Nursing Practice", "Child Health Nursing Practice", "Mental Health Nursing Practice", "Midwifery Practice", "Comprehensive Viva"] }
+      ],
+      "specializations": ["General Nursing", "Medical-Surgical Nursing", "Community Health Nursing", "Child Health Nursing", "Mental Health Nursing", "Obstetrics & Gynecological Nursing", "Critical Care Nursing"]
+    },
+
+    {
+      "programme_name": "Post Basic Bachelor of Science in Nursing",
+      "programme_code": "P.B.B.Sc. Nursing",
+      "programme_type": "Undergraduate / Post-Basic",
+      "duration": { "years": 2, "semesters": 4 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Nursing Foundation", "Advanced Nursing Practice", "Nursing Education", "Nutrition & Dietetics", "Biostatistics & Research Methodology", "Maternal Nursing"] },
+        { "semester_number": 2, "subjects": ["Child Health Nursing", "Mental Health Nursing", "Community Health Nursing", "Medical-Surgical Nursing", "Nursing Administration & Management", "Clinical Practicum"] },
+        { "semester_number": 3, "subjects": ["Advanced Medical-Surgical Nursing", "Community Health Nursing", "Nursing Research & Statistics", "Nursing Education & Administration", "Clinical Practicum", "Elective"] },
+        { "semester_number": 4, "subjects": ["Nursing Management", "Advanced Clinical Nursing Practice", "Community Health Practice", "Research Project/Dissertation", "Comprehensive Clinical Practicum", "Viva Voce"] }
+      ],
+      "specializations": ["General Nursing", "Medical-Surgical Nursing", "Community Health Nursing", "Child Health Nursing", "Mental Health Nursing", "Obstetric & Gynecological Nursing", "Critical Care Nursing"]
+    },
+
+    {
+      "programme_name": "Bachelor of Science in Biotechnology",
+      "programme_code": "B.Sc. Biotechnology",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 3, "semesters": 6 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Cell Biology", "Biochemistry", "Microbiology", "General Biology", "Chemistry", "Fundamentals of Biotechnology"] },
+        { "semester_number": 2, "subjects": ["Molecular Biology", "Genetics", "Microbial Physiology", "Biostatistics", "Bioinformatics Fundamentals", "Laboratory Techniques"] },
+        { "semester_number": 3, "subjects": ["Genetic Engineering", "Immunology", "Plant Biotechnology", "Animal Biotechnology", "Enzymology", "Molecular Biology Techniques"] },
+        { "semester_number": 4, "subjects": ["Recombinant DNA Technology", "Fermentation Technology", "Industrial Biotechnology", "Environmental Biotechnology", "Bioinformatics", "Cell Culture Techniques"] },
+        { "semester_number": 5, "subjects": ["Advanced Genetic Engineering", "Medical Biotechnology", "Pharmaceutical Biotechnology", "Genomics & Proteomics", "Bioprocess Engineering", "Research Methodology"] },
+        { "semester_number": 6, "subjects": ["Advanced Biotechnology", "Nanobiotechnology", "Food Biotechnology", "Agricultural Biotechnology", "Entrepreneurship & Intellectual Property Rights", "Major Project/Dissertation"] }
+      ],
+      "specializations": ["General", "Medical Biotechnology", "Industrial Biotechnology", "Agricultural Biotechnology", "Pharmaceutical Biotechnology", "Molecular Biology & Genetic Engineering", "Bioinformatics", "Environmental Biotechnology"]
+    },
+
+    {
+      "programme_name": "Bachelor of Science in Microbiology",
+      "programme_code": "B.Sc. Microbiology",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 3, "semesters": 6 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Fundamentals of Microbiology", "Cell Biology", "General Chemistry", "Biochemistry", "Basic Biology", "Microbiology Laboratory Techniques"] },
+        { "semester_number": 2, "subjects": ["Microbial Diversity", "Microbial Physiology", "Genetics", "Biochemistry", "Basic Immunology", "Microbiology Practical"] },
+        { "semester_number": 3, "subjects": ["Bacteriology", "Virology", "Mycology", "Immunology", "Microbial Genetics", "Microbial Physiology"] },
+        { "semester_number": 4, "subjects": ["Medical Microbiology", "Industrial Microbiology", "Environmental Microbiology", "Parasitology", "Food & Dairy Microbiology", "Microbial Biotechnology"] },
+        { "semester_number": 5, "subjects": ["Molecular Biology", "Clinical Microbiology", "Pharmaceutical Microbiology", "Industrial Biotechnology", "Microbial Technology", "Research Methodology"] },
+        { "semester_number": 6, "subjects": ["Advanced Microbiology", "Applied Microbiology", "Immunotechnology", "Molecular Diagnostics", "Bioinformatics", "Major Project/Dissertation"] }
+      ],
+      "specializations": ["General Microbiology", "Medical Microbiology", "Industrial Microbiology", "Clinical Microbiology", "Food & Dairy Microbiology", "Environmental Microbiology", "Microbial Biotechnology", "Molecular Microbiology"]
+    },
+
+    {
+      "programme_name": "Bachelor of Science in Food Science and Technology",
+      "programme_code": "B.Sc. FST",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 3, "semesters": 6 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Fundamentals of Food Science", "Food Chemistry", "Basic Microbiology", "Human Nutrition", "Food Processing Fundamentals", "Food Science Laboratory"] },
+        { "semester_number": 2, "subjects": ["Food Microbiology", "Food Biochemistry", "Food Preservation", "Food Processing Technology", "Food Analysis", "Food Processing Laboratory"] },
+        { "semester_number": 3, "subjects": ["Cereals & Grain Technology", "Fruits & Vegetable Processing", "Dairy Technology", "Meat & Fish Processing", "Food Engineering", "Food Quality Control"] },
+        { "semester_number": 4, "subjects": ["Bakery & Confectionery Technology", "Beverage Technology", "Fermentation Technology", "Food Packaging", "Food Safety & Hygiene", "Sensory Evaluation"] },
+        { "semester_number": 5, "subjects": ["Advanced Food Processing", "Food Biotechnology", "Functional Foods & Nutraceuticals", "Food Additives", "Quality Assurance & HACCP", "Research Methodology"] },
+        { "semester_number": 6, "subjects": ["Food Product Development", "Industrial Food Processing", "Food Regulations & Standards", "Supply Chain & Cold Chain Management", "Entrepreneurship", "Major Project/Industrial Training"] }
+      ],
+      "specializations": ["General", "Food Processing", "Food Safety & Quality Assurance", "Dairy Technology", "Meat & Fish Technology", "Bakery & Confectionery", "Food Biotechnology", "Nutrition & Functional Foods"]
+    },
+
+    {
+      "programme_name": "Bachelor of Science in Forensic Science",
+      "programme_code": "B.Sc. Forensic Science",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 3, "semesters": 6 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Introduction to Forensic Science", "General Chemistry", "Biology", "Physics", "Criminalistics", "Forensic Science Laboratory Techniques"] },
+        { "semester_number": 2, "subjects": ["Forensic Chemistry", "Forensic Biology", "Crime Scene Investigation", "Criminal Law & Criminal Justice System", "Fingerprint Science", "Forensic Laboratory Practical"] },
+        { "semester_number": 3, "subjects": ["Forensic Toxicology", "Forensic Serology", "Questioned Documents", "Ballistics & Firearms", "Photography & Crime Scene Documentation", "Evidence Handling"] },
+        { "semester_number": 4, "subjects": ["DNA Forensics", "Digital Forensics Fundamentals", "Forensic Anthropology", "Forensic Odontology", "Forensic Psychology", "Advanced Crime Scene Investigation"] },
+        { "semester_number": 5, "subjects": ["Advanced Forensic Toxicology", "Cyber & Digital Forensics", "Forensic Instrumentation", "Explosives & Arson Investigation", "Forensic Medicine", "Research Methodology"] },
+        { "semester_number": 6, "subjects": ["Advanced Criminalistics", "Cybercrime Investigation", "Forensic DNA Analysis", "Forensic Quality Management", "Expert Testimony & Court Procedures", "Major Project/Dissertation"] }
+      ],
+      "specializations": ["General", "Criminalistics", "Digital & Cyber Forensics", "Forensic Biology & DNA", "Forensic Chemistry & Toxicology", "Questioned Documents", "Forensic Psychology", "Crime Scene Investigation"]
+    },
+
+    {
+      "programme_name": "Bachelor of Technology in Civil Engineering",
+      "programme_code": "B.Tech Civil Engineering",
+      "programme_type": "Undergraduate",
+      "minimum_qualification": "12th Standard",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Engineering Mathematics I", "Engineering Physics", "Engineering Chemistry", "Basic Electrical Engineering", "Engineering Graphics", "Programming Fundamentals"] },
+        { "semester_number": 2, "subjects": ["Engineering Mathematics II", "Engineering Mechanics", "Basic Electronics", "Environmental Science", "Workshop Practice", "Communication Skills"] },
+        { "semester_number": 3, "subjects": ["Strength of Materials", "Fluid Mechanics", "Surveying", "Building Materials & Construction", "Engineering Geology", "Concrete Technology"] },
+        { "semester_number": 4, "subjects": ["Structural Analysis I", "Geotechnical Engineering I", "Hydraulics", "Transportation Engineering I", "Engineering Hydrology", "Building Services"] },
+        { "semester_number": 5, "subjects": ["Structural Analysis II", "Reinforced Cement Concrete Design", "Geotechnical Engineering II", "Transportation Engineering II", "Environmental Engineering I", "Construction Management"] },
+        { "semester_number": 6, "subjects": ["Steel Structure Design", "Environmental Engineering II", "Foundation Engineering", "Water Resources Engineering", "Quantity Surveying & Estimation", "Elective"] },
+        { "semester_number": 7, "subjects": ["Advanced Structural Design", "Bridge Engineering", "Construction Planning & Management", "Pavement Design", "Earthquake Engineering", "Professional Elective"] },
+        { "semester_number": 8, "subjects": ["Major Project", "Internship/Industrial Training", "Advanced Construction Technology", "Professional Elective", "Seminar", "Comprehensive Viva"] }
+      ],
+      "specializations": ["Structural Engineering", "Geotechnical Engineering", "Transportation Engineering", "Environmental Engineering", "Construction Management", "Water Resources Engineering", "Urban & Infrastructure Planning"]
+    },
+
+    {
+      "programme_name": "Bachelor of Technology in Mechanical Engineering",
+      "programme_code": "B.Tech Mechanical Engineering",
+      "programme_type": "Undergraduate",
+      "minimum_qualification": "12th Standard",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Engineering Mathematics I", "Engineering Physics", "Engineering Chemistry", "Basic Electrical Engineering", "Engineering Graphics", "Programming Fundamentals"] },
+        { "semester_number": 2, "subjects": ["Engineering Mathematics II", "Engineering Mechanics", "Basic Electronics", "Environmental Science", "Workshop Practice", "Communication Skills"] },
+        { "semester_number": 3, "subjects": ["Thermodynamics", "Engineering Materials", "Fluid Mechanics", "Manufacturing Processes I", "Strength of Materials", "Machine Drawing"] },
+        { "semester_number": 4, "subjects": ["Heat Transfer", "Theory of Machines", "Manufacturing Processes II", "Applied Thermodynamics", "Fluid Machinery", "Metrology & Measurements"] },
+        { "semester_number": 5, "subjects": ["Machine Design I", "Internal Combustion Engines", "Dynamics of Machinery", "Manufacturing Technology", "Industrial Engineering", "Engineering Economics"] },
+        { "semester_number": 6, "subjects": ["Machine Design II", "Refrigeration & Air Conditioning", "CAD/CAM", "Automobile Engineering", "Production Planning & Control", "Elective"] },
+        { "semester_number": 7, "subjects": ["Advanced Manufacturing Technology", "Finite Element Analysis", "Robotics & Automation", "Industrial Management", "Mechanical Vibrations", "Professional Elective"] },
+        { "semester_number": 8, "subjects": ["Major Project", "Internship/Industrial Training", "Advanced Mechanical Engineering", "Professional Elective", "Seminar", "Comprehensive Viva"] }
+      ],
+      "specializations": ["Design Engineering", "Manufacturing Engineering", "Thermal Engineering", "Automobile Engineering", "Robotics & Automation", "Mechatronics", "Industrial Engineering", "Renewable Energy"]
+    },
+
+    {
+      "programme_name": "Bachelor of Technology in Computer Science and Engineering — Data Science & Artificial Intelligence",
+      "programme_code": "B.Tech CSE (Data Science & AI)",
+      "programme_type": "Undergraduate",
+      "minimum_qualification": "12th Standard",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Engineering Mathematics I", "Programming Fundamentals", "Computer Fundamentals", "Engineering Physics", "Engineering Chemistry", "Communication Skills"] },
+        { "semester_number": 2, "subjects": ["Engineering Mathematics II", "Data Structures", "Object-Oriented Programming", "Digital Logic Design", "Computer Organization", "Environmental Science"] },
+        { "semester_number": 3, "subjects": ["Discrete Mathematics", "Database Management Systems", "Probability & Statistics", "Operating Systems", "Python Programming", "Data Science Fundamentals"] },
+        { "semester_number": 4, "subjects": ["Computer Networks", "Design & Analysis of Algorithms", "Artificial Intelligence Fundamentals", "Machine Learning Fundamentals", "Data Visualization", "Software Engineering"] },
+        { "semester_number": 5, "subjects": ["Advanced Machine Learning", "Deep Learning", "Data Mining", "Big Data Analytics", "Natural Language Processing", "Data Science Laboratory"] },
+        { "semester_number": 6, "subjects": ["Computer Vision", "Generative AI Fundamentals", "Cloud Computing", "Distributed Systems", "Statistical Learning", "Data Engineering & ETL"] },
+        { "semester_number": 7, "subjects": ["Advanced Artificial Intelligence", "Reinforcement Learning", "MLOps", "Advanced Data Analytics", "AI Ethics & Governance", "Professional Elective"] },
+        { "semester_number": 8, "subjects": ["Major Project", "Industry Internship", "Applied AI & Data Science", "Professional Elective", "Research/Innovation Project", "Comprehensive Viva"] }
+      ],
+      "specializations": ["Data Science", "Artificial Intelligence", "Machine Learning", "Big Data Analytics", "Data Engineering", "Generative AI", "AI & Machine Learning", "Business Intelligence & Analytics"]
+    },
+
+    {
+      "programme_name": "Bachelor of Optometry",
+      "programme_code": "B.Optom",
+      "programme_type": "Undergraduate",
+      "minimum_qualification": "12th Standard",
+      "duration": { "years": 5, "semesters": 8 },
+      "duration_note": "4 years of academic/clinical education (8 semesters) plus 1 year of compulsory clinical internship",
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Human Anatomy", "Human Physiology", "General Biochemistry", "Basic Optics", "Introduction to Optometry", "Communication Skills"] },
+        { "semester_number": 2, "subjects": ["Ocular Anatomy & Physiology", "Geometrical Optics", "Physical & Physiological Optics", "General Pathology", "Microbiology", "Clinical Optometry Fundamentals"] },
+        { "semester_number": 3, "subjects": ["Ocular Diseases I", "Optometric Instruments", "Ophthalmic Optics", "Pharmacology", "Clinical Examination Techniques", "Contact Lens Fundamentals"] },
+        { "semester_number": 4, "subjects": ["Ocular Diseases II", "Visual Optics", "Binocular Vision", "Contact Lens Practice", "Low Vision Care", "Clinical Optometry Practicum"] },
+        { "semester_number": 5, "subjects": ["Advanced Refraction", "Pediatric Optometry", "Binocular Vision & Orthoptics", "Ocular Pharmacology", "Ophthalmic Dispensing", "Clinical Optometry"] },
+        { "semester_number": 6, "subjects": ["Advanced Contact Lens", "Low Vision Rehabilitation", "Geriatric Optometry", "Occupational Optometry", "Public Health Optometry", "Clinical Case Management"] },
+        { "semester_number": 7, "subjects": ["Advanced Clinical Optometry", "Ocular Pathology", "Neuro-Optometry", "Community Optometry", "Research Methodology", "Optometric Practice Management"] },
+        { "semester_number": 8, "subjects": ["Specialty Contact Lenses", "Advanced Binocular Vision", "Low Vision Rehabilitation", "Ophthalmic Diagnostics", "Clinical Research", "Comprehensive Clinical Practicum"] }
+      ],
+      "additional_periods": [
+        {
+          "label": "5th Year — Clinical Internship",
+          "subjects": ["Ophthalmology", "Refraction & Vision Care", "Contact Lens Services", "Pediatric Optometry", "Low Vision Services", "Community Eye Care", "Hospital/Clinic Rotation", "Advanced Clinical Optometry", "Ophthalmic Procedures", "Patient Management", "Case Documentation", "Professional Practice"]
+        }
+      ],
+      "specializations": ["Clinical Optometry", "Pediatric Optometry", "Contact Lens & Corneal Care", "Low Vision Rehabilitation", "Binocular Vision & Orthoptics", "Community & Public Health Optometry", "Occupational Optometry"]
+    },
+
+    {
+      "programme_name": "Bachelor of Hotel Management and Catering Technology",
+      "programme_code": "BHMCT",
+      "programme_type": "Undergraduate",
+      "minimum_qualification": "12th Standard",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Food Production Fundamentals", "Food & Beverage Service", "Front Office Operations", "Housekeeping Operations", "Hotel Engineering", "Communication Skills"] },
+        { "semester_number": 2, "subjects": ["Advanced Food Production", "Food & Beverage Service Operations", "Front Office Management", "Housekeeping Management", "Nutrition & Food Science", "Hospitality Accounting"] },
+        { "semester_number": 3, "subjects": ["Advanced Food Production", "Bakery & Confectionery", "Bar & Beverage Management", "Hotel Front Office", "Housekeeping Operations", "Hospitality Marketing"] },
+        { "semester_number": 4, "subjects": ["Quantity Food Production", "Food & Beverage Management", "Accommodation Management", "Hospitality Human Resource Management", "Hospitality Law", "Tourism Management"] },
+        { "semester_number": 5, "subjects": ["Advanced Culinary Arts", "Restaurant Management", "Event Management", "Hospitality Sales & Marketing", "Financial Management", "Hospitality Technology"] },
+        { "semester_number": 6, "subjects": ["International Cuisine", "Advanced Beverage Management", "Revenue Management", "Hospitality Entrepreneurship", "Tourism & Destination Management", "Industrial Training"] },
+        { "semester_number": 7, "subjects": ["Strategic Hospitality Management", "Resort Management", "Hospitality Operations Management", "Quality Management", "Digital Hospitality", "Professional Elective"] },
+        { "semester_number": 8, "subjects": ["Major Project", "Hospitality Internship/Industrial Training", "Hotel Management Seminar", "Entrepreneurship", "Professional Elective", "Comprehensive Viva"] }
+      ],
+      "specializations": ["Hotel Management", "Food Production & Culinary Arts", "Food & Beverage Management", "Front Office Management", "Hospitality Operations", "Resort & Tourism Management", "Event Management", "Hospitality Entrepreneurship"]
+    },
+
+    {
+      "programme_name": "Bachelor of Pharmacy",
+      "programme_code": "B.Pharm",
+      "programme_type": "Undergraduate",
+      "minimum_qualification": "12th Standard",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Human Anatomy & Physiology I", "Pharmaceutical Analysis I", "Pharmaceutics I", "Pharmaceutical Inorganic Chemistry", "Communication Skills", "Remedial Mathematics/Biology"] },
+        { "semester_number": 2, "subjects": ["Human Anatomy & Physiology II", "Pharmaceutical Organic Chemistry I", "Biochemistry", "Pathophysiology", "Computer Applications in Pharmacy", "Environmental Sciences"] },
+        { "semester_number": 3, "subjects": ["Pharmaceutical Organic Chemistry II", "Physical Pharmaceutics I", "Pharmaceutical Microbiology", "Pharmaceutical Engineering", "Pharmacology I"] },
+        { "semester_number": 4, "subjects": ["Pharmaceutical Organic Chemistry III", "Physical Pharmaceutics II", "Medicinal Chemistry I", "Pharmacology II", "Pharmacognosy & Phytochemistry I", "Pharmaceutical Jurisprudence"] },
+        { "semester_number": 5, "subjects": ["Medicinal Chemistry II", "Industrial Pharmacy I", "Pharmacology III", "Pharmacognosy & Phytochemistry II", "Pharmaceutical Biotechnology", "Quality Assurance"] },
+        { "semester_number": 6, "subjects": ["Medicinal Chemistry III", "Pharmacology IV", "Herbal Drug Technology", "Biopharmaceutics & Pharmacokinetics", "Industrial Pharmacy II", "Pharmaceutical Marketing & Management"] },
+        { "semester_number": 7, "subjects": ["Instrumental Methods of Analysis", "Industrial Pharmacy III", "Novel Drug Delivery Systems", "Biostatistics & Research Methodology", "Clinical Pharmacy", "Elective"] },
+        { "semester_number": 8, "subjects": ["Biostatistics & Research Project", "Clinical Research", "Pharmacovigilance", "Drug Regulatory Affairs", "Community Pharmacy", "Major Project/Industrial Training"] }
+      ],
+      "specializations": ["Pharmaceutical Sciences", "Pharmaceutics", "Pharmacology", "Pharmaceutical Chemistry", "Pharmacognosy", "Clinical Pharmacy", "Industrial Pharmacy", "Pharmaceutical Biotechnology"]
+    },
+
+    {
+      "programme_name": "Bachelor of Physiotherapy",
+      "programme_code": "BPT",
+      "programme_type": "Undergraduate",
+      "minimum_qualification": "12th Standard",
+      "duration": { "years": 5, "semesters": 8 },
+      "duration_note": "4 academic years (8 semesters) + 1 year of advanced clinical training + 6-month compulsory internship, depending on the university's academic framework",
+      "semesters": [
+        { "semester_number": 1, "subjects": ["Human Anatomy I", "Physiology I", "Biochemistry", "Fundamentals of Physiotherapy", "Psychology", "Communication Skills"] },
+        { "semester_number": 2, "subjects": ["Human Anatomy II", "Physiology II", "Exercise Therapy I", "Electrotherapy I", "Biomechanics", "Basic Nursing & First Aid"] },
+        { "semester_number": 3, "subjects": ["Pathology", "Microbiology", "Pharmacology", "Exercise Therapy II", "Electrotherapy II", "Clinical Observation"] },
+        { "semester_number": 4, "subjects": ["General Medicine", "General Surgery", "Orthopedics", "Exercise Therapy III", "Electrotherapy III", "Clinical Physiotherapy Practice"] },
+        { "semester_number": 5, "subjects": ["Orthopedic Physiotherapy I", "Neurological Physiotherapy I", "Cardiopulmonary Physiotherapy I", "Sports Physiotherapy", "Research Methodology"] },
+        { "semester_number": 6, "subjects": ["Orthopedic Physiotherapy II", "Neurological Physiotherapy II", "Cardiopulmonary Physiotherapy II", "Pediatric Physiotherapy", "Geriatric Physiotherapy"] },
+        { "semester_number": 7, "subjects": ["Advanced Orthopedic Physiotherapy", "Advanced Neurological Physiotherapy", "Cardiopulmonary Rehabilitation", "Community-Based Rehabilitation", "Prosthetics & Orthotics"] },
+        { "semester_number": 8, "subjects": ["Advanced Clinical Physiotherapy", "Sports Rehabilitation", "Women's Health Physiotherapy", "Rehabilitation Management", "Evidence-Based Physiotherapy", "Research Project"] }
+      ],
+      "additional_periods": [
+        {
+          "label": "5th Year — Advanced Clinical Training",
+          "subjects": ["Orthopedics", "Neurology", "Cardiopulmonary Care", "Pediatrics", "Sports Rehabilitation", "Community Rehabilitation", "Clinical Case Management", "Specialized Physiotherapy Practice", "Patient Assessment", "Rehabilitation Planning", "Case Documentation", "Professional Practice"]
+        },
+        {
+          "label": "6-Month Compulsory Internship",
+          "subjects": ["Orthopedics", "Neurology", "Cardiopulmonary", "Pediatrics", "Sports Medicine", "Community Physiotherapy", "Hospital/Clinical Rotation"]
+        }
+      ],
+      "specializations": ["General Physiotherapy", "Orthopedic Physiotherapy", "Neurological Physiotherapy", "Cardiopulmonary Physiotherapy", "Sports Physiotherapy", "Pediatric Physiotherapy", "Geriatric Physiotherapy", "Community-Based Rehabilitation", "Women's Health Physiotherapy"]
+    }
+  ]
+}

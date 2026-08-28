@@ -1,0 +1,289 @@
+{
+  "document_type": "curriculum",
+
+  "programmes": [
+    {
+      "programme_name": "Bachelor of Computer Applications",
+      "programme_code": "BCA",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 3, "semesters": 6 },
+      "semesters": [
+        {
+          "semester_number": 1,
+          "subjects": ["Programming Fundamentals", "Computer Fundamentals", "Mathematics", "Digital Logic", "Communication Skills"]
+        },
+        {
+          "semester_number": 2,
+          "subjects": ["Data Structures", "Object-Oriented Programming", "Database Management Systems", "Operating Systems", "Web Technologies"]
+        },
+        {
+          "semester_number": 3,
+          "subjects": ["Computer Networks", "Software Engineering", "Advanced Database Systems", "Java Programming", "Statistics"]
+        },
+        {
+          "semester_number": 4,
+          "subjects": ["Python Programming", "Computer Graphics", "Web Development", "System Analysis & Design", "Elective"]
+        },
+        {
+          "semester_number": 5,
+          "subjects": ["Artificial Intelligence", "Cloud Computing", "Cyber Security", "Mobile Application Development", "Project Work"]
+        },
+        {
+          "semester_number": 6,
+          "subjects": ["Machine Learning", "Advanced Web Technologies", "Internship", "Major Project", "Professional/Elective Courses"]
+        }
+      ],
+      "specializations": [
+        "General",
+        "Artificial Intelligence & Machine Learning",
+        "Data Science",
+        "Cloud Computing",
+        "Cyber Security",
+        "Full Stack Development"
+      ]
+    },
+
+    {
+      "programme_name": "Bachelor of Technology",
+      "programme_code": "B.Tech",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        {
+          "semester_number": 1,
+          "subjects": ["Engineering Mathematics I", "Engineering Physics/Chemistry", "Programming Fundamentals", "Basic Electrical Engineering", "Engineering Graphics", "Communication Skills"]
+        },
+        {
+          "semester_number": 2,
+          "subjects": ["Engineering Mathematics II", "Engineering Physics/Chemistry", "Data Structures", "Basic Electronics", "Environmental Science", "Workshop/Engineering Practice"]
+        },
+        {
+          "semester_number": 3,
+          "subjects": ["Engineering Mathematics III", "Object-Oriented Programming", "Digital Electronics", "Computer Organization", "Discrete Mathematics", "Departmental Core Courses"]
+        },
+        {
+          "semester_number": 4,
+          "subjects": ["Operating Systems", "Database Management Systems", "Computer Networks", "Probability & Statistics", "Software Engineering", "Departmental Core/Elective"]
+        },
+        {
+          "semester_number": 5,
+          "subjects": ["Design & Analysis of Algorithms", "Web Technologies", "Artificial Intelligence", "Theory of Computation", "Departmental Electives", "Mini Project"]
+        },
+        {
+          "semester_number": 6,
+          "subjects": ["Machine Learning", "Cloud Computing", "Cyber Security", "Compiler Design", "Open Elective", "Internship/Project"]
+        },
+        {
+          "semester_number": 7,
+          "subjects": ["Advanced Departmental Courses", "Professional Electives", "Open Elective", "Major Project Phase I", "Seminar"]
+        },
+        {
+          "semester_number": 8,
+          "subjects": ["Major Project Phase II", "Internship/Industry Training", "Professional Electives", "Entrepreneurship/Professional Skills"]
+        }
+      ],
+      "specializations": [
+        "Computer Science & Engineering (CSE)",
+        "Artificial Intelligence & Machine Learning",
+        "Information Technology",
+        "Electronics & Communication Engineering (ECE)",
+        "Electrical Engineering (EE)",
+        "Mechanical Engineering (ME)",
+        "Civil Engineering (CE)",
+        "Data Science",
+        "Cyber Security"
+      ]
+    },
+
+    {
+      "programme_name": "Bachelor of Business Administration",
+      "programme_code": "BBA",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 3, "semesters": 6 },
+      "semesters": [
+        {
+          "semester_number": 1,
+          "subjects": ["Principles of Management", "Business Economics", "Financial Accounting", "Business Communication", "Business Mathematics", "Computer Applications in Business"]
+        },
+        {
+          "semester_number": 2,
+          "subjects": ["Organizational Behaviour", "Business Environment", "Marketing Management", "Cost & Management Accounting", "Business Statistics", "Human Resource Management"]
+        },
+        {
+          "semester_number": 3,
+          "subjects": ["Financial Management", "Consumer Behaviour", "Operations Management", "Business Law", "Research Methodology", "Entrepreneurship Development"]
+        },
+        {
+          "semester_number": 4,
+          "subjects": ["Corporate Finance", "Sales & Distribution Management", "Production & Operations Management", "Company Law", "Management Information Systems", "Elective Course"]
+        },
+        {
+          "semester_number": 5,
+          "subjects": ["Strategic Management", "International Business", "Digital Marketing", "Project Management", "Entrepreneurship", "Specialization Elective"]
+        },
+        {
+          "semester_number": 6,
+          "subjects": ["Business Policy", "E-Commerce", "Corporate Governance", "Investment Management", "Internship/Project Work", "Major Project/Viva"]
+        }
+      ],
+      "specializations": [
+        "General Management",
+        "Finance",
+        "Marketing",
+        "Human Resource Management",
+        "International Business",
+        "Entrepreneurship",
+        "Digital Marketing",
+        "Business Analytics",
+        "Banking & Finance",
+        "Logistics & Supply Chain Management"
+      ]
+    },
+
+    {
+      "programme_name": "Bachelor of Emergency Medical Technology",
+      "programme_code": "BEMT",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        {
+          "semester_number": 1,
+          "subjects": ["Human Anatomy", "Human Physiology", "Biochemistry", "Basic Medical Terminology", "Fundamentals of Emergency Care", "Communication Skills"]
+        },
+        {
+          "semester_number": 2,
+          "subjects": ["Pathology", "Microbiology", "Pharmacology", "Basic Life Support", "First Aid & Patient Safety", "Introduction to Emergency Medicine"]
+        },
+        {
+          "semester_number": 3,
+          "subjects": ["Emergency Medical Procedures", "General Medicine", "General Surgery", "Emergency Pharmacology", "Patient Assessment", "Medical Ethics & Professional Practice"]
+        },
+        {
+          "semester_number": 4,
+          "subjects": ["Trauma & Orthopedic Emergencies", "Cardiovascular Emergencies", "Respiratory Emergencies", "Neurological Emergencies", "Advanced Life Support", "Clinical Practicum"]
+        },
+        {
+          "semester_number": 5,
+          "subjects": ["Critical Care Technology", "Pediatric Emergencies", "Obstetric & Gynecological Emergencies", "Toxicology & Poisoning", "Disaster Management", "Emergency Department Management"]
+        },
+        {
+          "semester_number": 6,
+          "subjects": ["Intensive Care Unit Management", "Pre-Hospital Emergency Care", "Advanced Trauma Life Support", "Emergency Diagnostics", "Ambulance & Transport Medicine", "Clinical Internship"]
+        },
+        {
+          "semester_number": 7,
+          "subjects": ["Advanced Emergency Care", "Critical Care Procedures", "Disaster & Mass Casualty Management", "Emergency Medical Systems", "Research Methodology", "Elective"]
+        },
+        {
+          "semester_number": 8,
+          "subjects": ["Major Clinical Internship", "Emergency Department Training", "Pre-Hospital Care Training", "Research Project/Dissertation", "Case Presentation", "Viva Voce"]
+        }
+      ],
+      "specializations": [
+        "Emergency Medical Technology",
+        "Emergency & Trauma Care",
+        "Critical Care",
+        "Pre-Hospital Emergency Care",
+        "Disaster & Emergency Management"
+      ]
+    },
+
+    {
+      "programme_name": "Bachelor of Dialysis Therapy Technology",
+      "programme_code": "BDTT",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        {
+          "semester_number": 1,
+          "subjects": ["Human Anatomy", "Human Physiology", "Biochemistry", "Medical Terminology", "Fundamentals of Dialysis Technology", "Communication Skills"]
+        },
+        {
+          "semester_number": 2,
+          "subjects": ["Pathology", "Microbiology", "Pharmacology", "Nutrition & Dietetics", "Introduction to Renal Diseases", "Basic Patient Care"]
+        },
+        {
+          "semester_number": 3,
+          "subjects": ["Nephrology", "Renal Physiology", "Dialysis Principles & Procedures", "Dialysis Equipment & Maintenance", "Clinical Pathology", "Medical Ethics"]
+        },
+        {
+          "semester_number": 4,
+          "subjects": ["Hemodialysis Technology", "Peritoneal Dialysis", "Water Treatment & Purification", "Dialysis Pharmacology", "Infection Control", "Clinical Practicum"]
+        },
+        {
+          "semester_number": 5,
+          "subjects": ["Advanced Hemodialysis", "Vascular Access Management", "Acute Kidney Injury", "Chronic Kidney Disease", "Dialysis Complications", "Critical Care"]
+        },
+        {
+          "semester_number": 6,
+          "subjects": ["Pediatric Dialysis", "Renal Transplantation", "Emergency Management in Dialysis", "Dialysis Machine Technology", "Patient Monitoring", "Clinical Internship"]
+        },
+        {
+          "semester_number": 7,
+          "subjects": ["Advanced Dialysis Technology", "ICU & Critical Care Dialysis", "Continuous Renal Replacement Therapy", "Dialysis Unit Management", "Research Methodology", "Professional Practice"]
+        },
+        {
+          "semester_number": 8,
+          "subjects": ["Major Clinical Internship", "Advanced Dialysis Procedures", "Dialysis Unit Administration", "Research Project/Dissertation", "Case Presentation", "Viva Voce"]
+        }
+      ],
+      "specializations": [
+        "Dialysis Therapy Technology",
+        "Hemodialysis Technology",
+        "Advanced Dialysis & Critical Care",
+        "Renal Care Technology",
+        "Nephrology & Dialysis Technology"
+      ]
+    },
+
+    {
+      "programme_name": "Bachelor of Medical Laboratory Science",
+      "programme_code": "BMLS",
+      "programme_type": "Undergraduate",
+      "duration": { "years": 4, "semesters": 8 },
+      "semesters": [
+        {
+          "semester_number": 1,
+          "subjects": ["Human Anatomy", "Human Physiology", "Biochemistry", "Medical Terminology", "Fundamentals of Medical Laboratory Science", "Communication Skills"]
+        },
+        {
+          "semester_number": 2,
+          "subjects": ["General Pathology", "Basic Microbiology", "Basic Biochemistry", "Laboratory Safety & Biosafety", "Hematology Fundamentals", "Basic Patient Care"]
+        },
+        {
+          "semester_number": 3,
+          "subjects": ["Clinical Biochemistry", "Hematology", "Clinical Pathology", "Medical Microbiology", "Immunology", "Laboratory Instrumentation"]
+        },
+        {
+          "semester_number": 4,
+          "subjects": ["Advanced Hematology", "Clinical Microbiology", "Histopathology", "Immunohematology & Blood Banking", "Parasitology", "Clinical Laboratory Practicum"]
+        },
+        {
+          "semester_number": 5,
+          "subjects": ["Advanced Clinical Biochemistry", "Diagnostic Microbiology", "Histotechnology", "Cytology", "Molecular Diagnostics", "Laboratory Quality Management"]
+        },
+        {
+          "semester_number": 6,
+          "subjects": ["Clinical Immunology", "Transfusion Medicine", "Molecular Biology", "Advanced Diagnostic Techniques", "Laboratory Management", "Clinical Internship"]
+        },
+        {
+          "semester_number": 7,
+          "subjects": ["Advanced Medical Laboratory Techniques", "Clinical Research Methodology", "Laboratory Quality Assurance", "Automation in Medical Laboratories", "Public Health Laboratory Science", "Elective"]
+        },
+        {
+          "semester_number": 8,
+          "subjects": ["Major Clinical Internship", "Advanced Laboratory Practice", "Research Project/Dissertation", "Laboratory Management & Administration", "Case Studies", "Viva Voce"]
+        }
+      ],
+      "specializations": [
+        "Medical Laboratory Science",
+        "Clinical Laboratory Science",
+        "Clinical Biochemistry",
+        "Medical Microbiology",
+        "Hematology & Blood Banking",
+        "Histopathology & Cytology",
+        "Molecular Diagnostics"
+      ]
+    }
+  ]
+}
