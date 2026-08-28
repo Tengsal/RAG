@@ -1,0 +1,518 @@
+{
+  "university_metadata": {
+    "name": "Assam down town University (AdtU)",
+    "address": "Sankar Madhab Path, Gandhi Nagar, Panikhaiti, Guwahati, Assam — 781026",
+    "admission_contact": {
+      "email": "admission@adtu.in",
+      "phone": ["+91 98641 37777", "+91 361 7110711"]
+    },
+    "admission_session": "2026-27"
+  },
+  "academic_calendar": {
+    "academic_year": "2026-27",
+    "odd_semester": {
+      "start": "July 2026",
+      "end": "December 2026",
+      "schedule": {
+        "semester_begins": "July 2026",
+        "student_orientation": "July/August 2026",
+        "course_registration": "July 2026",
+        "regular_classes": "July – November 2026",
+        "internal_assessments": "September – November 2026",
+        "practical_examinations": "November/December 2026",
+        "end_semester_examination": "December 2026",
+        "result_declaration": "January 2027"
+      }
+    },
+    "even_semester": {
+      "start": "January 2027",
+      "end": "May/June 2027",
+      "schedule": {
+        "semester_begins": "January 2027",
+        "course_registration": "January 2027",
+        "regular_classes": "January – April/May 2027",
+        "internal_assessments": "March – April 2027",
+        "practical_examinations": "May 2027",
+        "end_semester_examination": "May/June 2027",
+        "result_declaration": "June/July 2027"
+      }
+    },
+    "examination_types": [
+      {"type": "Internal Assessment I", "period": "Mid-Semester"},
+      {"type": "Internal Assessment II", "period": "Near Semester End"},
+      {"type": "Practical Examination", "period": "End of Semester"},
+      {"type": "End-Semester Examination", "period": "December/ May–June"},
+      {"type": "Supplementary Examination", "period": "University notified"},
+      {"type": "Backlog Examination", "period": "University notified"},
+      {"type": "Project/ Viva Examination", "period": "Final Semester"}
+    ],
+    "holidays": [
+      {"name": "Independence Day", "date": "15 August", "category": "National"},
+      {"name": "Gandhi Jayanti", "date": "2 October", "category": "National"},
+      {"name": "Republic Day", "date": "26 January", "category": "National"},
+      {"name": "Christmas", "date": "25 December", "category": "Festival"},
+      {"name": "Diwali / Kali Puja", "date": "University Notified", "category": "Festival"},
+      {"name": "Bihu", "date": "University Notified", "category": "Regional"},
+      {"name": "Eid", "date": "University/Government Notified", "category": "Festival"}
+    ]
+  },
+  "administration": {
+    "senior_leadership": [
+      {"position": "Chancellor/ President", "name": "Dr. N. N. Dutta"},
+      {"position": "Vice Chancellor", "name": "Prof.(Dr.) Narayan Chandra Talukdar"},
+      {"position": "Pro Vice Chancellor", "name": "Prof. Pranveer Singh"},
+      {"position": "Registrar", "name": "Dr. Ashim Barman"},
+      {"position": "Dean of Studies", "name": "Prof. Bandana Dutta"},
+      {"position": "Controller of Examinations", "name": "Dr. Jaydeep Goswami"}
+    ],
+    "key_directors": [
+      {"position": "Director, Directorate of Student Affairs", "name": "Prof. Seema Sharma"},
+      {"position": "Assistant Director, Directorate of Student Affairs", "name": "Dr. Sangita Boro"},
+      {"position": "Director, Directorate of International Affairs", "name": "Prof. Mrinmoy Basak"},
+      {"position": "Director, Directorate of Alumni", "name": "Dr. Samanay Baruah"},
+      {"position": "Director, IQAC", "name": "Prof. Ananta Choudhury"},
+      {"position": "Deputy Registrar (Academic)", "name": "Dr. Nitul Jyoti Das"},
+      {"position": "Deputy Registrar (Academic)", "name": "Dr. Ruhit Jyoti Konwar"},
+      {"position": "Deputy Registrar (Administration)", "name": "Dr. Yahya Mazumder"},
+      {"position": "Dy. Director, HR & Administration", "name": "Ms. Manika Bora"}
+    ],
+    "governing_body": [
+      {"name": "Dr. N. N. Dutta", "role": "Chancellor, Chairperson"},
+      {"name": "Prof.(Dr.) N. C. Talukdar", "role": "Vice Chancellor, Member"},
+      {"name": "Dr. Nandita Choudhury", "role": "Member"},
+      {"name": "Prof.(Dr.) Amarjyoti Choudhury", "role": "Member"},
+      {"name": "Mr. Biswa Datta", "role": "Member"},
+      {"name": "Dr. B. K. Gogoi", "role": "Member"},
+      {"name": "Dr. Debashish Mitra", "role": "Member"},
+      {"name": "Ms. Mayurakshi Dutta", "role": "Member"},
+      {"name": "Ms. Gariasi Dutta", "role": "Member"},
+      {"name": "Dr. Ashim Barman", "role": "Member Secretary"}
+    ],
+    "committees": {
+      "anti_ragging": {
+        "chairperson": "Prof. Pranveer Singh",
+        "co_chairperson": "Prof. Seema Sharma",
+        "member_secretary": "Dr. Sangita Boro",
+        "members": [
+          "Dr. Khem Bahadur Pun",
+          "Prof. Rajeev Sarmah",
+          "Dr. Mala Dutta",
+          "Dr. Abhijit Kalita",
+          "Prof. Ananta Choudhury",
+          "Prof. Mrinmoy Basak",
+          "Prof. Nirmali Gogoi"
+        ]
+      },
+      "student_grievance_redressal": {
+        "members": [
+          "Dr. Ashim Barman",
+          "Dr. Ruhit Jyoti Konwar",
+          "Dr. Nitul Jyoti Das",
+          "Prof. Mrinmoy Basak",
+          "Prof. Manashi Sengupta",
+          "Dr. Prateeti Barman",
+          "Dr. Sangita Boro",
+          "Dr. Ankur Pan Saikia"
+        ]
+      },
+      "internal_complaints_committee": {
+        "purpose": "Addressing complaints relating to sexual harassment and maintaining a safe academic environment"
+      }
+    }
+  },
+  "rules_and_policies": {
+    "attendance": {
+      "minimum_required": "75%",
+      "consequence": "Students falling short may be restricted from appearing in examinations",
+      "tracking": "Recorded and uploaded through the university's ERP system"
+    },
+    "examination_process": [
+      "Course registration",
+      "Examination notification",
+      "Examination form submission",
+      "Examination schedule",
+      "Admit-card generation",
+      "End-semester examination",
+      "Evaluation of answer scripts",
+      "Tabulation of marks",
+      "Result declaration",
+      "Re-evaluation, where applicable",
+      "Grade-sheet generation"
+    ],
+    "promotion_and_backlog": [
+      "Students must satisfy academic requirements to progress.",
+      "Failed/outstanding papers require backlog/compartmental exams.",
+      "AdtU conducts special compartmental examinations."
+    ],
+    "student_conduct": "Ragging is strictly prohibited. Students must comply with the University's Act, Statutes, Ordinances, and Regulations.",
+    "official_documents": [
+      "Academic Regulations",
+      "Examination Ordinance",
+      "Instructions to Students",
+      "Examination Management",
+      "Grading System",
+      "Student Attendance",
+      "Anti-Ragging Policy",
+      "Student Grievance Redressal",
+      "Academic Integrity/ Plagiarism"
+    ]
+  },
+  "admissions": {
+    "eligibility_matrix": [
+      {"programme": "BCA", "min_qualification": "10+2", "additional": "Mathematics preferably; bridge course if absent"},
+      {"programme": "BBA", "min_qualification": "10+2", "additional": "Relevant programme requirements"},
+      {"programme": "B.Sc. Programmes", "min_qualification": "10+2", "additional": "Relevant Science subjects"},
+      {"programme": "B.Tech. Programmes", "min_qualification": "10+2", "additional": "Physics/Mathematics for engineering"},
+      {"programme": "B.Sc. Nursing", "min_qualification": "10+2", "additional": "Relevant Science subjects for Nursing"},
+      {"programme": "Allied & Healthcare", "min_qualification": "10+2", "additional": "Relevant Science subjects"},
+      {"programme": "B.Pharm", "min_qualification": "10+2", "additional": "Relevant Science subjects for Pharmacy"},
+      {"programme": "BPT", "min_qualification": "10+2", "additional": "Relevant Science subjects"},
+      {"programme": "BHMCT", "min_qualification": "10+2", "additional": "Any stream"},
+      {"programme": "Post Basic B.Sc. Nursing", "min_qualification": "Nursing qualification", "additional": "Specific professional eligibility"}
+    ],
+    "required_documents": [
+      "Class 10 Mark Sheet",
+      "Class 12 Mark Sheet",
+      "Passport-size Photograph",
+      "Valid Government ID",
+      "Transfer Certificate",
+      "Migration Certificate"
+    ],
+    "application_process": [
+      "1. Application (Online facility)",
+      "2. Registration (Personal, contact, academic details)",
+      "3. Document Submission",
+      "4. Eligibility Verification",
+      "5. Entrance Examination/ Interview (if applicable)",
+      "6. Admission Confirmation & Fee Payment",
+      "7. Orientation & Enrollment"
+    ]
+  },
+  "fees_and_scholarships": {
+    "fee_components": [
+      "Admission Fee", "Semester/Tuition Fee", "Registration Fee", "Examination Fee", 
+      "Security Deposit", "Laboratory/Practical Fee", "Clinical/Hospital Training Fee", 
+      "Internship/Industrial Training Fee", "Hostel Fee", "Transportation Fee"
+    ],
+    "scholarships": {
+      "merit_based": [
+        {"percentage": "95% and above", "benefit": "100% on all semesters"},
+        {"percentage": "90% – 94.9%", "benefit": "50% on all semesters"},
+        {"percentage": "80% – 89.9%", "benefit": "25% on all semesters"}
+      ],
+      "sports": [
+        {"level": "National/International", "benefit": "100% on all semesters"},
+        {"level": "State", "benefit": "50% on all semesters"},
+        {"level": "District/NCC", "benefit": "25% on all semesters"}
+      ],
+      "art_and_culture": [
+        {"level": "National/International", "benefit": "100% on all semesters"},
+        {"level": "State", "benefit": "50% on all semesters"},
+        {"level": "District", "benefit": "25% on all semesters"}
+      ],
+      "specially_abled": "50% on total semester fees",
+      "alumni": "100% on last semester fee",
+      "economically_backward_bpl": "100% on total semester fees",
+      "xopun_scheme_2026": {
+        "description": "250+ free seats for Economically Weaker Section (EWS)",
+        "criteria": [
+          "Minimum 60% in Class 10",
+          "Minimum 60% in Class 12",
+          "Minimum 60% in UG degree (where applicable)",
+          "Preference for government school candidates",
+          "Family income below ₹3 lakh per annum",
+          "Valid EWS/Income/Annayojona certificate"
+        ],
+        "financials": "₹10,000 refundable security deposit, No additional fees",
+        "deadline": "31 July 2026"
+      }
+    }
+  },
+  "student_services": {
+    "hostel": {
+      "facilities": [
+        "Separate male/female accommodation", "Furnished rooms", "Wi-Fi/internet", 
+        "Mess and dining", "Common areas", "Recreational facilities", "Security", 
+        "Housekeeping", "Electricity/water", "Medical/emergency support"
+      ]
+    },
+    "library": {
+      "resources": ["Textbooks", "Reference books", "Journals", "E-books", "E-journals", "Research publications", "Newspapers", "Digital resources", "Online databases"],
+      "services": ["Book issue/return", "Book reservation", "Reference services", "Digital library access", "Reading facilities", "Research assistance"]
+    },
+    "transport": {
+      "services": ["University bus service", "Multiple routes across Guwahati", "Scheduled pick-up/drop-off", "Transport passes"]
+    },
+    "support_cells": [
+      {"name": "Directorate of Student Affairs (DoSA)", "head": "Prof. Seema Sharma", "focus": "Student welfare, clubs, events, Cabinet"},
+      {"name": "Student Grievance Redressal", "focus": "Academic, admin, fee, hostel, harassment complaints"},
+      {"name": "Equal Opportunity Cell", "focus": "Inclusive education, non-discrimination, disadvantaged support"},
+      {"name": "Anti-Ragging Committee", "focus": "Prevention and reporting of ragging/bullying"},
+      {"name": "Internal Complaints Committee (ICC)", "focus": "Sexual harassment complaints"},
+      {"name": "Career & Placement Support", "focus": "Career guidance and placements"},
+      {"name": "Counselling/ Student Support", "focus": "Personal and academic support"}
+    ]
+  },
+  "programmes": [
+    {
+      "programme_code": "B.Tech Civil Engineering",
+      "programme_name": "B.Tech. in Civil Engineering",
+      "programme_type": "Undergraduate",
+      "duration": "4 Years",
+      "semesters_count": 8,
+      "minimum_qualification": "12th Standard",
+      "mode": "Full Time",
+      "category": "Engineering",
+      "specialization": "Civil Engineering",
+      "internship": "Yes",
+      "project": "Major Engineering Project",
+      "specializations_list": ["Structural Engineering", "Geotechnical Engineering", "Transportation Engineering", "Environmental Engineering", "Construction Management", "Water Resources Engineering", "Urban & Infrastructure Planning"],
+      "semesters": [
+        {"year": "1st Year", "semester": "I", "subjects": ["Engineering Mathematics I", "Engineering Physics", "Engineering Chemistry", "Engineering Graphics", "Programming Fundamentals"]},
+        {"year": "1st Year", "semester": "II", "subjects": ["Engineering Mathematics II", "Engineering Mechanics", "Basic Electronics", "Environmental Science", "Workshop Practice"]},
+        {"year": "2nd Year", "semester": "III", "subjects": ["Strength of Materials", "Fluid Mechanics", "Surveying", "Building Materials", "Engineering Geology"]},
+        {"year": "2nd Year", "semester": "IV", "subjects": ["Structural Analysis", "Geotechnical Engineering", "Hydraulics", "Transportation Engineering", "Engineering Hydrology"]},
+        {"year": "3rd Year", "semester": "V", "subjects": ["RCC Design", "Structural Analysis II", "Geotechnical Engineering II", "Transportation Engineering II", "Environmental Engineering"]},
+        {"year": "3rd Year", "semester": "VI", "subjects": ["Steel Structure Design", "Foundation Engineering", "Water Resources Engineering", "Construction Management", "Quantity Surveying"]},
+        {"year": "4th Year", "semester": "VII", "subjects": ["Advanced Structural Design", "Bridge Engineering", "Construction Planning", "Earthquake Engineering", "Professional Elective"]},
+        {"year": "4th Year", "semester": "VIII", "subjects": ["Major Project", "Internship/Industrial Training", "Professional Elective", "Seminar", "Comprehensive Viva"]}
+      ]
+    },
+    {
+      "programme_code": "B.Tech CSE (Data Science & AI)",
+      "programme_name": "B.Tech. CSE — Data Science & AI",
+      "programme_type": "Undergraduate",
+      "duration": "4 Years",
+      "semesters_count": 8,
+      "minimum_qualification": "12th Standard",
+      "mode": "Full Time",
+      "category": "Engineering",
+      "specialization": "Data Science & AI",
+      "internship": "Yes",
+      "project": "Major Engineering Project",
+      "specializations_list": ["Data Science", "Artificial Intelligence", "Machine Learning", "Big Data Analytics", "Data Engineering", "Generative AI", "AI & Machine Learning"],
+      "semesters": [
+        {"year": "1st Year", "semester": "I", "subjects": ["Engineering Mathematics I", "Programming Fundamentals", "Computer Fundamentals", "Engineering Physics", "Engineering Chemistry", "Communication Skills"]},
+        {"year": "1st Year", "semester": "II", "subjects": ["Engineering Mathematics II", "Data Structures", "Object-Oriented Programming", "Digital Logic Design", "Computer Organization", "Environmental Science"]},
+        {"year": "2nd Year", "semester": "III", "subjects": ["Discrete Mathematics", "Database Management Systems", "Probability & Statistics", "Operating Systems", "Python Programming", "Data Science Fundamentals"]},
+        {"year": "2nd Year", "semester": "IV", "subjects": ["Computer Networks", "Design & Analysis of Algorithms", "Artificial Intelligence Fundamentals", "Machine Learning Fundamentals", "Data Visualization", "Software Engineering"]},
+        {"year": "3rd Year", "semester": "V", "subjects": ["Advanced Machine Learning", "Deep Learning", "Data Mining", "Big Data Analytics", "Natural Language Processing", "Data Science Laboratory"]},
+        {"year": "3rd Year", "semester": "VI", "subjects": ["Computer Vision", "Generative AI Fundamentals", "Cloud Computing", "Distributed Systems", "Statistical Learning", "Data Engineering & ETL"]},
+        {"year": "4th Year", "semester": "VII", "subjects": ["Advanced Artificial Intelligence", "Reinforcement Learning", "MLOps", "Advanced Data Analytics", "AI Ethics & Governance", "Professional Elective"]},
+        {"year": "4th Year", "semester": "VIII", "subjects": ["Major Project", "Industry Internship", "Applied AI & Data Science", "Professional Elective", "Research/Innovation Project", "Comprehensive Viva"]}
+      ]
+    },
+    {
+      "programme_code": "B.Sc. Nursing",
+      "programme_name": "B.Sc. Nursing",
+      "duration": "4 Years",
+      "minimum_qualification": "12th Standard",
+      "specializations_list": ["General Nursing", "Medical-Surgical Nursing", "Community Health Nursing", "Child Health Nursing", "Mental Health Nursing", "Obstetrics & Gynecological Nursing", "Critical Care Nursing"],
+      "clinical_training": ["Medical-Surgical Nursing", "Community Health Nursing", "Child Health Nursing", "Mental Health Nursing", "Obstetrics & Gynecological Nursing"],
+      "internship": "Clinical/Rotatory Internship",
+      "semesters": [
+        {"semester": 1, "subjects": ["Anatomy", "Physiology", "Biochemistry", "Nursing Foundations", "Psychology", "Introduction to Nursing Education", "Communication & Educational Technology"]},
+        {"semester": 2, "subjects": ["Nutrition & Dietetics", "Sociology", "Nursing Foundations II", "Microbiology", "Pharmacology", "Health Assessment & Nursing Procedures"]},
+        {"semester": 3, "subjects": ["Medical-Surgical Nursing I", "Pharmacology & Pathology", "Community Health Nursing I", "Sociology & Psychology", "Nursing Research Fundamentals"]},
+        {"semester": 4, "subjects": ["Medical-Surgical Nursing II", "Pharmacology", "Community Health Nursing II", "Child Health Nursing", "Nursing Education & Administration"]},
+        {"semester": 5, "subjects": ["Child Health Nursing", "Mental Health Nursing", "Midwifery & Obstetrical Nursing", "Community Health Nursing", "Nursing Research & Statistics"]},
+        {"semester": 6, "subjects": ["Midwifery & Obstetrical Nursing II", "Mental Health Nursing II", "Medical-Surgical Nursing III", "Community Health Nursing", "Nursing Management"]},
+        {"semester": 7, "subjects": ["Nursing Management & Administration", "Nursing Education", "Advanced Medical-Surgical Nursing", "Community Health Nursing", "Clinical Practicum"]},
+        {"semester": 8, "subjects": ["Internship", "Community Health Nursing Practice", "Medical-Surgical Nursing Practice", "Child Health Nursing Practice", "Mental Health Nursing Practice", "Midwifery Practice", "Comprehensive Viva"]}
+      ]
+    },
+    {
+      "programme_code": "BPT",
+      "programme_name": "Bachelor of Physiotherapy",
+      "duration": "5 Years + 6-Month Internship",
+      "minimum_qualification": "12th Standard",
+      "specializations_list": ["Orthopedic Physiotherapy", "Neurological Physiotherapy", "Cardiopulmonary Physiotherapy", "Sports Physiotherapy", "Pediatric Physiotherapy", "Geriatric Physiotherapy", "Community-Based Rehabilitation", "Women's Health Physiotherapy"],
+      "clinical_training": ["Orthopedics", "Neurology", "Cardiopulmonary", "Pediatrics", "Sports Rehabilitation", "Community Physiotherapy"],
+      "internship": "6 Months",
+      "project": "Clinical Case Study/ Research Project",
+      "semesters": [
+        {"semester": 1, "subjects": ["Human Anatomy I", "Physiology I", "Biochemistry", "Fundamentals of Physiotherapy", "Psychology", "Communication Skills"]},
+        {"semester": 2, "subjects": ["Human Anatomy II", "Physiology II", "Exercise Therapy I", "Electrotherapy I", "Biomechanics", "Basic Nursing & First Aid"]},
+        {"semester": 3, "subjects": ["Pathology", "Microbiology", "Pharmacology", "Exercise Therapy II", "Electrotherapy II", "Clinical Observation"]},
+        {"semester": 4, "subjects": ["General Medicine", "General Surgery", "Orthopedics", "Exercise Therapy III", "Electrotherapy III", "Clinical Physiotherapy Practice"]},
+        {"semester": 5, "subjects": ["Orthopedic Physiotherapy I", "Neurological Physiotherapy I", "Cardiopulmonary Physiotherapy I", "Sports Physiotherapy", "Research Methodology"]},
+        {"semester": 6, "subjects": ["Orthopedic Physiotherapy II", "Neurological Physiotherapy II", "Cardiopulmonary Physiotherapy II", "Pediatric Physiotherapy", "Geriatric Physiotherapy"]},
+        {"semester": 7, "subjects": ["Advanced Orthopedic Physiotherapy", "Advanced Neurological Physiotherapy", "Cardiopulmonary Rehabilitation", "Community-Based Rehabilitation", "Prosthetics & Orthotics"]},
+        {"semester": 8, "subjects": ["Advanced Clinical Physiotherapy", "Sports Rehabilitation", "Women's Health Physiotherapy", "Rehabilitation Management", "Evidence-Based Physiotherapy", "Research Project"]}
+      ]
+    },
+    {
+      "programme_code": "BHMCT",
+      "programme_name": "Bachelor of Hotel Management and Catering Technology",
+      "duration": "4 Years",
+      "minimum_qualification": "12th Standard",
+      "specializations_list": ["Hotel Management", "Food Production & Culinary Arts", "Food & Beverage Management", "Front Office Management", "Hospitality Operations", "Resort & Tourism Management", "Event Management", "Hospitality Entrepreneurship"],
+      "industrial_training": ["Food Production", "Food & Beverage Service", "Front Office", "Housekeeping", "Hotel Operations"],
+      "project": "Hospitality Management Project/ Industrial Training",
+      "semesters": [
+        {"semester": 1, "subjects": ["Food Production Fundamentals", "Food & Beverage Service", "Front Office Operations", "Housekeeping Operations", "Hotel Engineering", "Communication Skills"]},
+        {"semester": 2, "subjects": ["Advanced Food Production", "Food & Beverage Service Operations", "Front Office Management", "Housekeeping Management", "Nutrition & Food Science", "Hospitality Accounting"]},
+        {"semester": 3, "subjects": ["Advanced Food Production", "Bakery & Confectionery", "Bar & Beverage Management", "Hotel Front Office", "Housekeeping Operations", "Hospitality Marketing"]},
+        {"semester": 4, "subjects": ["Quantity Food Production", "Food & Beverage Management", "Accommodation Management", "Hospitality Human Resource Management", "Hospitality Law", "Tourism Management"]},
+        {"semester": 5, "subjects": ["Advanced Culinary Arts", "Restaurant Management", "Event Management", "Hospitality Sales & Marketing", "Financial Management", "Hospitality Technology"]},
+        {"semester": 6, "subjects": ["International Cuisine", "Advanced Beverage Management", "Revenue Management", "Hospitality Entrepreneurship", "Tourism & Destination Management", "Industrial Training"]},
+        {"semester": 7, "subjects": ["Strategic Hospitality Management", "Resort Management", "Hospitality Operations Management", "Quality Management", "Digital Hospitality", "Professional Elective"]},
+        {"semester": 8, "subjects": ["Major Project", "Hospitality Internship/Industrial Training", "Hotel Management Seminar", "Entrepreneurship", "Professional Elective", "Comprehensive Viva"]}
+      ]
+    },
+    {
+      "programme_code": "B.Pharm",
+      "programme_name": "Bachelor of Pharmacy",
+      "duration": "4 Years",
+      "minimum_qualification": "12th Standard",
+      "specializations_list": ["Pharmaceutics", "Pharmacology", "Pharmaceutical Chemistry", "Pharmacognosy", "Clinical Pharmacy", "Industrial Pharmacy", "Pharmaceutical Biotechnology"],
+      "project": "Research Project/ Dissertation",
+      "semesters": [
+        {"semester": 1, "subjects": ["Human Anatomy & Physiology I", "Pharmaceutical Analysis I", "Pharmaceutics I", "Pharmaceutical Inorganic Chemistry", "Communication Skills", "Remedial Mathematics/Biology"]},
+        {"semester": 2, "subjects": ["Human Anatomy & Physiology II", "Pharmaceutical Organic Chemistry I", "Biochemistry", "Pathophysiology", "Computer Applications in Pharmacy", "Environmental Sciences"]},
+        {"semester": 3, "subjects": ["Pharmaceutical Organic Chemistry II", "Physical Pharmaceutics I", "Pharmaceutical Microbiology", "Pharmaceutical Engineering", "Pharmacology I"]},
+        {"semester": 4, "subjects": ["Pharmaceutical Organic Chemistry III", "Physical Pharmaceutics II", "Medicinal Chemistry I", "Pharmacology II", "Pharmacognosy & Phytochemistry I", "Pharmaceutical Jurisprudence"]},
+        {"semester": 5, "subjects": ["Medicinal Chemistry II", "Industrial Pharmacy I", "Pharmacology III", "Pharmacognosy & Phytochemistry II", "Pharmaceutical Biotechnology", "Quality Assurance"]},
+        {"semester": 6, "subjects": ["Medicinal Chemistry III", "Pharmacology IV", "Herbal Drug Technology", "Biopharmaceutics & Pharmacokinetics", "Industrial Pharmacy II", "Pharmaceutical Marketing & Management"]},
+        {"semester": 7, "subjects": ["Instrumental Methods of Analysis", "Industrial Pharmacy III", "Novel Drug Delivery Systems", "Biostatistics & Research Methodology", "Clinical Pharmacy", "Elective"]},
+        {"semester": 8, "subjects": ["Biostatistics & Research Project", "Clinical Research", "Pharmacovigilance", "Drug Regulatory Affairs", "Community Pharmacy", "Major Project/Industrial Training"]}
+      ]
+    },
+    {
+      "programme_code": "BCA",
+      "programme_name": "Bachelor of Computer Applications",
+      "duration": "3 Years",
+      "minimum_qualification": "12th Standard",
+      "specializations_list": ["Software Development", "Data Analytics", "Cloud Computing", "Cyber Security"],
+      "internship": "Yes",
+      "project": "Major Project",
+      "semesters": [
+        {"semester": 1, "subjects": ["Programming Fundamentals", "Computer Fundamentals", "Mathematics I", "Communication Skills"]},
+        {"semester": 2, "subjects": ["Data Structures", "Object-Oriented Programming", "Mathematics II", "Environmental Science"]},
+        {"semester": 3, "subjects": ["Database Management Systems", "Operating Systems", "Computer Networks", "Web Development"]},
+        {"semester": 4, "subjects": ["Software Engineering", "System Analysis & Design", "Java Programming", "Core Java"]},
+        {"semester": 5, "subjects": ["Cloud Computing", "Cyber Security", "Mobile App Development", "Elective"]},
+        {"semester": 6, "subjects": ["Major Project", "Internship", "Professional Elective", "Comprehensive Viva"]}
+      ]
+    },
+    {
+      "programme_code": "BBA",
+      "programme_name": "Bachelor of Business Administration",
+      "duration": "3 Years",
+      "minimum_qualification": "12th Standard",
+      "specializations_list": ["Marketing", "Finance", "Human Resources", "International Business", "Entrepreneurship"],
+      "internship": "Yes",
+      "project": "Major Project",
+      "semesters": [
+        {"semester": 1, "subjects": ["Business Organization", "Financial Accounting", "Business Mathematics", "Communication Skills"]},
+        {"semester": 2, "subjects": ["Microeconomics", "Marketing Management", "Business Statistics", "Environmental Studies"]},
+        {"semester": 3, "subjects": ["Macroeconomics", "Organizational Behavior", "Business Law", "Computer Applications"]},
+        {"semester": 4, "subjects": ["Financial Management", "Human Resource Management", "Cost Accounting", "Business Ethics"]},
+        {"semester": 5, "subjects": ["Operations Management", "International Business", "Entrepreneurship", "Elective"]},
+        {"semester": 6, "subjects": ["Strategic Management", "Major Project", "Internship", "Comprehensive Viva"]}
+      ]
+    },
+    {
+      "programme_code": "B.Sc. Biotechnology",
+      "programme_name": "B.Sc. Biotechnology",
+      "duration": "3 Years",
+      "minimum_qualification": "12th Standard",
+      "semesters": [
+        {"semester": 1, "subjects": ["Cell Biology", "Biochemistry", "Microbiology", "General Biology", "Chemistry", "Fundamentals of Biotechnology"]},
+        {"semester": 2, "subjects": ["Molecular Biology", "Genetics", "Microbial Physiology", "Biostatistics", "Bioinformatics Fundamentals", "Laboratory Techniques"]},
+        {"semester": 3, "subjects": ["Genetic Engineering", "Immunology", "Plant Biotechnology", "Animal Biotechnology", "Enzymology", "Molecular Biology Techniques"]},
+        {"semester": 4, "subjects": ["Recombinant DNA Technology", "Fermentation Technology", "Industrial Biotechnology", "Environmental Biotechnology", "Bioinformatics", "Cell Culture Techniques"]},
+        {"semester": 5, "subjects": ["Advanced Genetic Engineering", "Medical Biotechnology", "Pharmaceutical Biotechnology", "Genomics & Proteomics", "Bioprocess Engineering", "Research Methodology"]},
+        {"semester": 6, "subjects": ["Advanced Biotechnology", "Nanobiotechnology", "Food Biotechnology", "Agricultural Biotechnology", "Entrepreneurship & IPR", "Major Project"]}
+      ]
+    },
+    {
+      "programme_code": "B.Sc. Microbiology",
+      "programme_name": "B.Sc. Microbiology",
+      "duration": "3 Years",
+      "minimum_qualification": "12th Standard",
+      "semesters": [
+        {"semester": 1, "subjects": ["Fundamentals of Microbiology", "Cell Biology", "General Chemistry", "Biochemistry", "Basic Biology", "Microbiology Lab Techniques"]},
+        {"semester": 2, "subjects": ["Microbial Diversity", "Microbial Physiology", "Genetics", "Biochemistry", "Basic Immunology", "Microbiology Practical"]},
+        {"semester": 3, "subjects": ["Bacteriology", "Virology", "Mycology", "Immunology", "Microbial Genetics", "Microbial Physiology"]},
+        {"semester": 4, "subjects": ["Medical Microbiology", "Industrial Microbiology", "Environmental Microbiology", "Parasitology", "Food & Dairy Microbiology", "Microbial Biotechnology"]},
+        {"semester": 5, "subjects": ["Molecular Biology", "Clinical Microbiology", "Pharmaceutical Microbiology", "Industrial Biotechnology", "Microbial Technology", "Research Methodology"]},
+        {"semester": 6, "subjects": ["Advanced Microbiology", "Applied Microbiology", "Immunotechnology", "Molecular Diagnostics", "Bioinformatics", "Major Project"]}
+      ]
+    },
+    {
+      "programme_code": "B.Sc. FST",
+      "programme_name": "B.Sc. Food Science & Technology",
+      "duration": "3 Years",
+      "minimum_qualification": "12th Standard",
+      "semesters": [
+        {"semester": 1, "subjects": ["Fundamentals of Food Science", "Food Chemistry", "Basic Microbiology", "Human Nutrition", "Food Processing Fundamentals", "Food Science Lab"]},
+        {"semester": 2, "subjects": ["Food Microbiology", "Food Biochemistry", "Food Preservation", "Food Processing Technology", "Food Analysis", "Food Processing Lab"]},
+        {"semester": 3, "subjects": ["Cereals & Grain Technology", "Fruits & Vegetable Processing", "Dairy Technology", "Meat & Fish Processing", "Food Engineering", "Food Quality Control"]},
+        {"semester": 4, "subjects": ["Bakery & Confectionery Technology", "Beverage Technology", "Fermentation Technology", "Food Packaging", "Food Safety & Hygiene", "Sensory Evaluation"]},
+        {"semester": 5, "subjects": ["Advanced Food Processing", "Food Biotechnology", "Functional Foods & Nutraceuticals", "Food Additives", "Quality Assurance & HACCP", "Research Methodology"]},
+        {"semester": 6, "subjects": ["Food Product Development", "Industrial Food Processing", "Food Regulations & Standards", "Supply Chain Management", "Entrepreneurship", "Major Project"]}
+      ]
+    },
+    {
+      "programme_code": "B.Sc. Forensic Science",
+      "programme_name": "B.Sc. Forensic Science",
+      "duration": "3 Years",
+      "minimum_qualification": "12th Standard",
+      "semesters": [
+        {"semester": 1, "subjects": ["Intro to Forensic Science", "General Chemistry", "Biology", "Physics", "Criminalistics", "Forensic Lab Techniques"]},
+        {"semester": 2, "subjects": ["Forensic Chemistry", "Forensic Biology", "Crime Scene Investigation", "Criminal Law", "Fingerprint Science", "Forensic Lab Practical"]},
+        {"semester": 3, "subjects": ["Forensic Toxicology", "Forensic Serology", "Questioned Documents", "Ballistics & Firearms", "Photography & Crime Scene", "Evidence Handling"]},
+        {"semester": 4, "subjects": ["DNA Forensics", "Digital Forensics Fundamentals", "Forensic Anthropology", "Forensic Odontology", "Forensic Psychology", "Advanced Crime Scene"]},
+        {"semester": 5, "subjects": ["Advanced Forensic Toxicology", "Cyber & Digital Forensics", "Forensic Instrumentation", "Explosives & Arson", "Forensic Medicine", "Research Methodology"]},
+        {"semester": 6, "subjects": ["Advanced Criminalistics", "Cybercrime Investigation", "Forensic DNA Analysis", "Forensic Quality Management", "Expert Testimony", "Major Project"]}
+      ]
+    },
+    {
+      "programme_code": "B.Optom",
+      "programme_name": "Bachelor of Optometry",
+      "duration": "5 Years (4 Academic + 1 Internship)",
+      "minimum_qualification": "12th Standard",
+      "semesters": [
+        {"semester": 1, "subjects": ["Human Anatomy", "Human Physiology", "General Biochemistry", "Basic Optics", "Intro to Optometry", "Communication Skills"]},
+        {"semester": 2, "subjects": ["Ocular Anatomy & Physiology", "Geometrical Optics", "Physical & Physiological Optics", "General Pathology", "Microbiology", "Clinical Optometry Fundamentals"]},
+        {"semester": 3, "subjects": ["Ocular Diseases I", "Optometric Instruments", "Ophthalmic Optics", "Pharmacology", "Clinical Examination Techniques", "Contact Lens Fundamentals"]},
+        {"semester": 4, "subjects": ["Ocular Diseases II", "Visual Optics", "Binocular Vision", "Contact Lens Practice", "Low Vision Care", "Clinical Optometry Practicum"]},
+        {"semester": 5, "subjects": ["Advanced Refraction", "Pediatric Optometry", "Binocular Vision & Orthoptics", "Ocular Pharmacology", "Ophthalmic Dispensing", "Clinical Optometry"]},
+        {"semester": 6, "subjects": ["Advanced Contact Lens", "Low Vision Rehabilitation", "Geriatric Optometry", "Occupational Optometry", "Public Health Optometry", "Clinical Case Management"]},
+        {"semester": 7, "subjects": ["Advanced Clinical Optometry", "Ocular Pathology", "Neuro-Optometry", "Community Optometry", "Research Methodology", "Optometric Practice Management"]},
+        {"semester": 8, "subjects": ["Specialty Contact Lenses", "Advanced Binocular Vision", "Low Vision Rehabilitation", "Ophthalmic Diagnostics", "Clinical Research", "Comprehensive Clinical Practicum"]}
+      ]
+    },
+    {
+      "programme_code": "BEMT",
+      "programme_name": "Bachelor of Emergency Medical Technology",
+      "duration": "4 Years",
+      "minimum_qualification": "12th Standard"
+    },
+    {
+      "programme_code": "BDTT",
+      "programme_name": "Bachelor of Dialysis Therapy Technology",
+      "duration": "4 Years",
+      "minimum_qualification": "12th Standard"
+    },
+    {
+      "programme_code": "BMLS",
+      "programme_name": "Bachelor of Medical Laboratory Science",
+      "duration": "4 Years",
+      "minimum_qualification": "12th Standard"
+    },
+    {
+      "programme_code": "BMRIT",
+      "programme_name": "Bachelor of Medical Radiology and Imaging Technology",
+      "duration": "4 Years",
+      "minimum_qualification": "12th Standard"
+    },
+    {
+      "programme_code": "P.B.B.Sc. Nursing",
+      "programme_name": "Post Basic B.Sc. Nursing",
+      "duration": "2 Years",
+      "minimum_qualification": "Nursing qualification"
+    }
+  ]
+}
