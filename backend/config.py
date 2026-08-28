@@ -135,6 +135,11 @@ RERANKER_MODEL_NAME = os.environ.get(
 # verification shows regressions.
 RERANK_CANDIDATE_MAX = int(os.environ.get("RERANK_CANDIDATE_MAX", "20"))
 
+# Per-document chunk budget in the final reranked evidence. Tables often span
+# multiple chunks of the same PDF, so one document may keep up to this many
+# top-K slots instead of the old hard limit of 1 per document.
+MAX_CHUNKS_PER_DOC = int(os.environ.get("MAX_CHUNKS_PER_DOC", "3"))
+
 # -----------------------------
 # Phase 5: Epistemic / Evidence Validator & Uncertainty Score
 # -----------------------------
@@ -151,6 +156,14 @@ W_COVERAGE = 0.15   # Citation/chunk agreement across the top-3 chunks.
 THRESHOLD_HIGH = 0.45   # Lowered so it answers more readily
 THRESHOLD_LOW = 0.20    # Lowered so it only refuses truly irrelevant queries
                         # Between LOW and HIGH -> CLARIFY (ask user to specify).
+
+# Grounding support path (exact-token, not entity-based): when the user's
+# distinctive tokens literally appear in the top-3 evidence, a moderate
+# composite can still answer. It is a SUPPORT signal only — it sits AFTER the
+# hard guard and the THRESHOLD_HIGH branch, and it can never lift a weak
+# rerank past RERANK_GROUND_FLOOR.
+GROUNDED_ANSWER_THRESHOLD = 0.35   # composite floor for the support path
+RERANK_GROUND_FLOOR = 0.20         # semantic floor: never boost garbage reranks
 
 # The 3 possible actions the validator can return.
 ACTION_ANSWER = "ANSWER"
@@ -189,6 +202,11 @@ GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 # concise. Citations are mandatory, so the cap stays generous enough for a
 # 2-4 sentence cited answer.
 LLM_MAX_OUTPUT_TOKENS = int(os.environ.get("LLM_MAX_OUTPUT_TOKENS", "400"))
+
+# Per-chunk character budget sent to the LLM. Tables and OCR pages need more
+# room than the old 600-char preview to cite the exact row; still far under
+# the model context limit.
+EVIDENCE_MAX_CHARS = int(os.environ.get("EVIDENCE_MAX_CHARS", "1500"))
 
 # Semantic intent descriptions used for Phase 2 Step 1 intent detection.
 #

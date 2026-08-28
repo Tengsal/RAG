@@ -309,7 +309,7 @@ async def ask_question(req: QueryRequest):
     T.mark("reranking")
 
     # 5. Validate
-    decision = validator.validate(intent_res, evidence)
+    decision = validator.validate(intent_res, evidence, query)
     T.mark("validation")
 
     # Format sources for frontend. The full chunk text ships here (already in

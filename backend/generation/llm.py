@@ -27,8 +27,9 @@ STRICT RULES:
 1. If the evidence does not contain the answer, reply EXACTLY: "I couldn't find this information in the available university documents."
 2. Every factual claim MUST be cited inline like this: [Source: filename | Page X].
 3. If a DYNAMIC document (notice) contradicts a STATIC document (regulation), trust the DYNAMIC document as it is newer.
-4. Be extremely concise (2-4 sentences). No reasoning, no follow-up questions for factual queries.
+4. Be concise (2-6 sentences or a short bullet list). For structured evidence such as fee tables or syllabus lists, a short bullet list or compact table is preferred. No reasoning, no follow-up questions for factual queries.
 5. For casual greetings, just be polite and helpful without citations.
+6. OCR-extracted text and meeting minutes are valid evidence sources — quote them normally when they contain the answer.
 
 FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
 Answer: [Your concise, cited answer]
@@ -39,12 +40,13 @@ def generate_answer(query: str, evidence: list, decision: dict, entities: dict) 
     if not api_key:
         return "Error: GROQ_API_KEY is missing."
 
-    # 1. Format evidence into text (truncate to 600 chars to keep payload tiny and fast)
+    # 1. Format evidence into text (per-chunk budget from config; wide enough
+    #    for table rows and OCR pages, still tiny next to the context limit)
     context_text = ""
     for i, e in enumerate(evidence[:5], 1): # Only send top 5 chunks max
         filename = e['source'].split('/')[-1]
         kind = "DYNAMIC" if e.get("category", "") in config.DYNAMIC_CATEGORIES else "STATIC"
-        text_preview = e['text'][:600] 
+        text_preview = e['text'][:config.EVIDENCE_MAX_CHARS]
         context_text += f"[Chunk {i}] {filename} | Page {e['page']} | {kind}\n{text_preview}\n\n"
         
     # 2. Build messages for Groq chat API

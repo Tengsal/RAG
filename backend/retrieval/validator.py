@@ -12,9 +12,51 @@ Signals used (all four weighted in the composite via config.W_*):
     retriever - top Milvus cosine similarity (broad semantic match)
     reranker  - top cross-encoder confidence (deep, exact match)
     coverage  - agreement across the top-3 chunks (citation-agreement proxy)
+
+A fifth signal — exact-token grounding — is a SUPPORT path only: if the
+user's distinctive tokens literally appear in the top-3 evidence, a moderate
+composite can answer. It never overrides the hard guard, the THRESHOLD_HIGH
+path, or the rerank floor (RERANK_GROUND_FLOOR).
 """
 
+import re
+
 import config
+
+STOPWORDS = {'the', 'is', 'of', 'in', 'what', 'who', 'are', 'was', 'for',
+             'and', 'to', 'a', 'an', 'how', 'when', 'where', 'why', 'does',
+             'do', 'did', 'can', 'could', 'will', 'would', 'should', 'my',
+             'please', 'tell', 'about', 'which'}
+
+# Bounded, CLOSED extended-stopword set of domain-generic nouns.
+# This is NOT an entity list; it never grows with new programs/departments.
+GENERIC_TERMS = {'fee', 'fees', 'structure', 'syllabus', 'syllabi', 'subject',
+    'subjects', 'semester', 'semesters', 'course', 'courses', 'curriculum',
+    'admission', 'admissions', 'eligibility', 'rule', 'rules', 'exam', 'exams',
+    'examination', 'placement', 'placements', 'hostel', 'scholarship',
+    'scholarships', 'year', 'years'}
+
+
+def _tokens(text: str) -> set:
+    """Lowercase alphanumeric tokens of length > 2 — exact, never substrings."""
+    return {t for t in re.findall(r'[a-z0-9]+', text.lower()) if len(t) > 2}
+
+
+def _grounding_signal(query: str, evidence: list):
+    """Returns (has_distinctive, grounded) using EXACT token membership.
+
+    Distinctive tokens = query tokens minus stopwords minus the closed set of
+    domain-generic nouns. Grounded when at least half of them appear verbatim
+    in the concatenated top-3 evidence chunks (set intersection, no substring
+    matching). A query with no distinctive tokens ("what is the fee
+    structure") gets no boost at all.
+    """
+    distinctive = _tokens(query) - STOPWORDS - GENERIC_TERMS
+    if not distinctive or not evidence:
+        return False, False
+    top3 = _tokens(" ".join(e.get("text", "") for e in evidence[:3]))
+    found = distinctive & top3          # set intersection, never substring
+    return True, len(found) >= max(1, len(distinctive) // 2)
 
 
 def _coverage_signal(evidence: list) -> float:
@@ -31,12 +73,14 @@ def _coverage_signal(evidence: list) -> float:
     return strong / len(top)
 
 
-def validate(intent_result: dict, evidence: list) -> dict:
+def validate(intent_result: dict, evidence: list, query: str = "") -> dict:
     """Run the epistemic validation gate.
 
     Args:
         intent_result: output of query_understanding.intent.detect_intent().
         evidence: reranked evidence list from retrieval.rerank.rerank().
+        query: the raw user question, for the exact-token grounding support
+            path (empty string disables it — CLI callers stay unchanged).
 
     Returns:
         Decision dict:
@@ -77,6 +121,8 @@ def validate(intent_result: dict, evidence: list) -> dict:
     if s_coverage >= 0.66:
         reasons.append("evidence agreement: multiple top chunks match the query")
 
+    has_dist, grounded = _grounding_signal(query, evidence)
+
     # Hard guard: even if composite looks okay, a very weak top chunk means the
     # answer would not be grounded -> refuse (truth over fluency).
     # Lowered from 0.10 to 0.05 to allow borderline entity-specific queries to pass to the LLM.
@@ -86,6 +132,10 @@ def validate(intent_result: dict, evidence: list) -> dict:
     elif composite >= config.THRESHOLD_HIGH:
         action = config.ACTION_ANSWER
         reasons.append("composite confidence high -> answer directly")
+    elif grounded and s_reranker >= config.RERANK_GROUND_FLOOR \
+            and composite >= config.GROUNDED_ANSWER_THRESHOLD:
+        action = config.ACTION_ANSWER
+        reasons.append("grounded support: distinctive query tokens found in top evidence")
     elif composite >= config.THRESHOLD_LOW:
         action = config.ACTION_CLARIFY
         reasons.append("moderate confidence -> ask clarifying question")
