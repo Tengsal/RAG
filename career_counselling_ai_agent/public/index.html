@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assam Down Town University (AdtU) — Admissions AI Operations Portal</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages.css" />
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- ══════════ PERSISTENT LEFT SIDEBAR ══════════ -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">🎓</div>
+        <div class="brand-info">
+          <h1 class="brand-name">Assam Down Town</h1>
+          <span class="brand-tag">Admissions AI Portal</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Admissions Operations</div>
+        <a class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-item" data-view="calls">
+          <span class="nav-icon">📡</span>
+          <span class="nav-label">Live Calls</span>
+          <span class="nav-badge pulse-badge" id="nav-live-count">Live</span>
+        </a>
+        <a class="nav-item" data-view="leads">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">Leads & CRM</span>
+        </a>
+        <a class="nav-item" data-view="dispatch">
+          <span class="nav-icon">📞</span>
+          <span class="nav-label">Call Dispatch</span>
+        </a>
+        <a class="nav-item" data-view="campaigns">
+          <span class="nav-icon">🚀</span>
+          <span class="nav-label">Bulk Campaigns</span>
+        </a>
+        <a class="nav-item" data-view="courses">
+          <span class="nav-icon">📚</span>
+          <span class="nav-label">Course Knowledge</span>
+        </a>
+        <a class="nav-item" data-view="summaries">
+          <span class="nav-icon">✨</span>
+          <span class="nav-label">AI Summaries</span>
+        </a>
+        <a class="nav-item" data-view="analytics">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label">Reports & Analytics</span>
+        </a>
+
+        <div class="nav-section-label" style="margin-top: 20px;">System & Admin</div>
+        <a class="nav-item" data-view="system">
+          <span class="nav-icon">🔌</span>
+          <span class="nav-label">System Status</span>
+        </a>
+        <a class="nav-item" data-view="settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Settings & Roles</span>
+        </a>
+      </nav>
+
+      <!-- Counselor Support Routing Card (Bottom of Sidebar) -->
+      <div class="sidebar-counselor-card">
+        <div class="counselor-header">
+          <span class="counselor-status-dot"></span>
+          <span>Senior Counselor Routing</span>
+        </div>
+        <div class="counselor-number">+919678926411</div>
+        <p class="counselor-desc">Active target for live AI-to-human call transfer</p>
+      </div>
+    </aside>
+
+    <!-- ══════════ MAIN CONTENT WRAPPER ══════════ -->
+    <div class="main-wrapper">
+      <!-- TOP NAVBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-sidebar-toggle" id="sidebar-toggle">☰</button>
+          <div class="breadcrumbs">
+            <span class="bc-root">Admissions Portal</span>
+            <span class="bc-sep">/</span>
+            <span class="bc-current" id="page-title">Dashboard</span>
+          </div>
+          <!-- Primary Global Action Button -->
+          <button class="btn btn-sm btn-primary-gradient" id="topbar-dispatch-btn">+ Quick Dispatch</button>
+        </div>
+
+        <div class="topbar-right">
+          <!-- System Status Dropdown Wrapper -->
+          <div class="system-status-wrapper" id="health-pills">
+            <button class="status-trigger-btn status-dim">
+              <span class="status-dot"></span>
+              <span>Checking status…</span>
+            </button>
+          </div>
+
+          <!-- Notifications Icon Button -->
+          <button class="icon-btn-ghost" title="System Notifications" id="notif-btn">
+            🔔<span class="notif-badge-dot"></span>
+          </button>
+
+          <!-- Google Auth Profile -->
+          <div class="auth-box" id="auth-box">
+            <div id="g_id_onload"
+                 data-client_id="GOOGLE_CLIENT_ID_REDACTED"
+                 data-callback="handleGoogleSignIn"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" data-type="standard" data-size="medium" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+            <div id="user-profile" hidden class="user-profile">
+              <img id="user-avatar" class="avatar" src="" alt="User profile" />
+              <div class="user-info">
+                <span id="user-name" class="user-name">User</span>
+                <span id="user-email" class="user-email">user@adtu.in</span>
+              </div>
+              <button id="logout-btn" class="btn-logout" title="Sign Out">Sign out</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ══════════ DYNAMIC PAGE CONTAINER ══════════ -->
+      <main class="content-body" id="page-container"></main>
+
+      <!-- FOOTER -->
+      <footer class="app-footer">
+        <div class="footer-container">
+          <span>Assam Down Town University Admissions Voice AI Operations Portal · MongoDB Atlas & Gemini 3.6 Flash</span>
+          <span>Port :5100 · Human Senior Counselor Transfer +919678926411</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ════════ CRM LEAD SUMMARY SIDE DRAWER MODAL ════════ -->
+  <div class="drawer-backdrop" id="lead-drawer-backdrop" hidden></div>
+  <aside class="drawer-panel" id="lead-drawer" hidden>
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title-row">
+          <h2 class="drawer-title" id="drawer-student-name">Student Lead Intelligence</h2>
+          <span class="chip chip-green" id="drawer-sentiment-chip">Interested</span>
+        </div>
+        <p class="drawer-subtitle" id="drawer-student-sub">Phone: — | Reference ID: —</p>
+      </div>
+      <button class="btn-drawer-close" id="close-drawer-btn" title="Close Drawer">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Executive AI Summary Box -->
+      <div class="drawer-section">
+        <h3 class="drawer-section-title">✨ Gemini 3.6 Flash Admissions AI Summary</h3>
+        <p class="drawer-summary-text" id="drawer-summary-text">Loading intelligence summary…</p>
+      </div>
+
+      <!-- Structured Grid -->
+      <div class="drawer-grid">
+        <div class="drawer-grid-item">
+          <span class="grid-label">Key Qualification</span>
+          <strong class="grid-val" id="drawer-qual">—</strong>
+        </div>
+        <div class="drawer-grid-item">
+          <span class="grid-label">Interested Program</span>
+          <strong class="grid-val" id="drawer-course">—</strong>
+        </div>
+        <div class="drawer-grid-item">
+          <span class="grid-label">Fees & Structure Discussed</span>
+          <strong class="grid-val" id="drawer-fees">—</strong>
+        </div>
+        <div class="drawer-grid-item">
+          <span class="grid-label">Preferred Callback Time</span>
+          <strong class="grid-val" id="drawer-callback">—</strong>
+        </div>
+      </div>
+
+      <!-- Counselor Action Items -->
+      <div class="action-items-box" id="drawer-actions-box">
+        <strong>Senior Counselor Next Action Steps:</strong>
+        <ul id="drawer-action-items-list">
+          <li>Follow up with student regarding program admission process.</li>
+        </ul>
+      </div>
+
+      <!-- Transcript Details -->
+      <details class="drawer-transcript-details" open>
+        <summary class="drawer-transcript-summary">📜 Full Call Transcript</summary>
+        <pre class="transcript-pre" id="drawer-transcript">(No raw transcript captured)</pre>
+      </details>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-sm btn-secondary" id="close-drawer-footer-btn">Close Drawer</button>
+    </div>
+  </aside>
+
+  <div class="toasts-container" id="toasts"></div>
+
+  <!-- Modular Frontend Core -->
+  <script src="js/core/api.js"></script>
+  <script src="js/core/state.js"></script>
+  <script src="js/core/auth.js"></script>
+  <!-- Modular Frontend Components -->
+  <script src="js/components/toast.js"></script>
+  <script src="js/components/navbar.js"></script>
+  <script src="js/components/sidebar.js"></script>
+  <script src="js/components/drawer.js"></script>
+  <!-- Modular Frontend Pages -->
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/liveCalls.js"></script>
+  <script src="js/pages/crmLeads.js"></script>
+  <script src="js/pages/callDispatch.js"></script>
+  <script src="js/pages/bulkCampaigns.js"></script>
+  <script src="js/pages/courseKnowledge.js"></script>
+  <script src="js/pages/aiSummaries.js"></script>
+  <script src="js/pages/analytics.js"></script>
+  <script src="js/pages/system.js"></script>
+  <script src="js/pages/settings.js"></script>
+  <!-- Modular Router Engine -->
+  <script src="js/core/router.js"></script>
+  <!-- Application Entry Point -->
+  <script src="app.js"></script>
+</body>
+</html>
