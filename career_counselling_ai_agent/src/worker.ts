@@ -381,6 +381,7 @@ const agentDefinition = defineAgent({
     let interrupted = false;
     let currentAbortController: AbortController | null = null;
     let callEnded = false;
+    let transferring = false;
     let callAnswered = false;
     let lastAudioActivityMs = Date.now();
     let silenceWarningFired = false;
@@ -694,26 +695,31 @@ const agentDefinition = defineAgent({
         : 'completed';
       await notifyCallStatus(hadConversation ? 'completed' : failStatus, reason);
 
-      // Remove SIP participant via LiveKit API (proven pattern)
-      try {
-        const roomSvc = new RoomServiceClient(
-          process.env.LIVEKIT_URL!,
-          process.env.LIVEKIT_API_KEY!,
-          process.env.LIVEKIT_API_SECRET!,
-        );
-        const participants = await roomSvc.listParticipants(roomName);
-        for (const p of participants) {
-          if (p.identity.startsWith('sip_')) {
-            logger.info(`📴 Removing SIP participant: ${p.identity}`);
-            try {
-              await roomSvc.removeParticipant(roomName, p.identity);
-            } catch (e: any) {
-              logger.warn(`⚠️ Could not remove ${p.identity}: ${e?.message}`);
+      // Remove SIP participant via LiveKit API (proven pattern).
+      // Skipped for transfers — the SIP transfer API already moved the caller
+      // out of the room; removing the participant here could race with the
+      // transfer and kill the caller ↔ human leg.
+      if (reason !== 'transferred') {
+        try {
+          const roomSvc = new RoomServiceClient(
+            process.env.LIVEKIT_URL!,
+            process.env.LIVEKIT_API_KEY!,
+            process.env.LIVEKIT_API_SECRET!,
+          );
+          const participants = await roomSvc.listParticipants(roomName);
+          for (const p of participants) {
+            if (p.identity.startsWith('sip_')) {
+              logger.info(`📴 Removing SIP participant: ${p.identity}`);
+              try {
+                await roomSvc.removeParticipant(roomName, p.identity);
+              } catch (e: any) {
+                logger.warn(`⚠️ Could not remove ${p.identity}: ${e?.message}`);
+              }
             }
           }
+        } catch (e: any) {
+          logger.warn(`⚠️ Could not list/remove participants: ${e?.message}`);
         }
-      } catch (e: any) {
-        logger.warn(`⚠️ Could not list/remove participants: ${e?.message}`);
       }
 
       await sleep(500);
@@ -814,7 +820,7 @@ const agentDefinition = defineAgent({
         callAnswered,
       });
       if (!isSystemResume && (!text || text.trim().length < 3)) return;
-      if (callEnded) return;
+      if (callEnded || transferring) return;
 
       const transcriptLower = text.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, '').trim();
       if (!isSystemResume && FILLER_WORDS.has(transcriptLower)) {
@@ -955,6 +961,42 @@ const agentDefinition = defineAgent({
         if (intent === 'TRANSFER_REQ') {
           await speak('Aapko hamare senior admissions counsellor se connect kar rahi hoon, please line par rahein.', signal, turnId);
           await sleep(1500);
+
+          // ✅ TRUE transfer (not a conference): stop the agent's ears and
+          // voice processing IMMEDIATELY — no more STT → LLM → TTS tokens —
+          // then move the SIP caller out of the room via LiveKit's SIP
+          // transfer API so they connect DIRECTLY to the human. The agent
+          // disconnects and never joins the transferred leg.
+          transferring = true;
+          try { stt.close(); } catch {}
+
+          let sipIdentity: string | null = null;
+          for (const p of ctx.room.remoteParticipants.values()) {
+            if (p.identity.startsWith('sip_')) { sipIdentity = p.identity; break; }
+          }
+
+          const transferTo = process.env.TRANSFER_TO_NUMBER || '+917085803754';
+          if (sipIdentity) {
+            try {
+              const sipClient = new SipClient(
+                process.env.LIVEKIT_URL!,
+                process.env.LIVEKIT_API_KEY!,
+                process.env.LIVEKIT_API_SECRET!,
+              );
+              await sipClient.transferSipParticipant(roomName, sipIdentity, transferTo);
+              logger.info(`📞 Caller ${sipIdentity} transferred to ${transferTo} — agent leaving the call`);
+            } catch (e: any) {
+              logger.error(`❌ SIP transfer failed: ${e?.message || e}`);
+              await speak('Maafi chahti hoon, abhi connect nahi ho paya. Hamara senior counsellor aapko wapas call karega. Thank you!', signal, turnId);
+              await endCall('transfer_failed');
+              return;
+            }
+          } else {
+            logger.warn('⚠️ No SIP participant in room — cannot transfer call');
+            await endCall('transfer_failed');
+            return;
+          }
+
           await endCall('transferred');
           return;
         }
@@ -1090,7 +1132,7 @@ const agentDefinition = defineAgent({
 
     // 12. Wire STT events + room audio
     stt.on('transcript', (text: string) => {
-      if (callEnded) return; // ✅ Drop transcripts after call ended
+      if (callEnded || transferring) return; // ✅ Drop transcripts after call ended / during transfer
       if (playbackTurnId) {
         logger.warn(`[OVERLAP] finalTranscript=${JSON.stringify(text)} playbackTurnId=${playbackTurnId} activeTurnId=${activeTurnId || 'none'}`);
       }
@@ -1100,7 +1142,7 @@ const agentDefinition = defineAgent({
 
     stt.on('interimTranscript', (text: string) => {
       const trimmed = (text || '').trim();
-      if (trimmed.length < 2 || callEnded) return;
+      if (trimmed.length < 2 || callEnded || transferring) return;
       lastAudioActivityMs = Date.now();
       const words = trimmed.split(/\s+/).length;
       const isRealSpeech = words >= 2 || trimmed.length >= 6;
@@ -1199,7 +1241,9 @@ const agentDefinition = defineAgent({
 
     const handleParticipantDisconnected = async (participant: any) => {
       logger.info(`👋 Participant disconnected: ${participant.identity}`);
-      if (participant.identity.startsWith('sip_') && !callEnded) {
+      // During a transfer the SIP participant leaves because it was moved to
+      // the human — that must NOT be treated as a caller hangup.
+      if (participant.identity.startsWith('sip_') && !callEnded && !transferring) {
         await endCall('caller_hangup');
       }
     };

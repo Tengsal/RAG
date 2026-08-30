@@ -1,33 +1,43 @@
-INFO:     Started server process [16120]
+INFO:     Started server process [7540]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:61740 - "GET /health HTTP/1.1" 200 OK
-✅ Loaded 19 programmes: BCA, B.TECH, BBA, BEMT, BDTT, BMLS, B.SC. NURSING, P.B.B.SC. NURSING, B.SC. BIOTECHNOLOGY, B.SC. MICROBIOLOGY, B.SC. FST, B.SC. FORENSIC SCIENCE, B.TECH CIVIL ENGINEERING, B.TECH MECHANICAL ENGINEERING, B.TECH CSE (DATA SCIENCE & AI), B.OPTOM, BHMCT, B.PHARM, BPT
+INFO:     127.0.0.1:12989 - "GET /health HTTP/1.1" 200 OK
+✅ Loaded 20 programmes: BCA, B.TECH, BBA, BEMT, BDTT, BMLS, B.SC. NURSING, P.B.B.SC. NURSING, B.SC. BIOTECHNOLOGY, B.SC. MICROBIOLOGY, B.SC. FST, B.SC. FORENSIC SCIENCE, B.TECH CIVIL ENGINEERING, B.TECH MECHANICAL ENGINEERING, B.TECH CSE (DATA SCIENCE & AI), B.OPTOM, BHMCT, B.PHARM, BPT, BMRIT
+✅ Loaded university sections: university_metadata, academic_calendar, administration, rules_and_policies, admissions, fees_and_scholarships, student_services, people, committees, facilities, semesters_index
 [query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
-INFO:     127.0.0.1:61744 - "POST /ask HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61750 - "POST /ask HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12990 - "POST /ask HTTP/1.1" 200 OK
 [query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
-INFO:     127.0.0.1:61760 - "POST /ask HTTP/1.1" 200 OK
-2026-08-28 23:49:47,918 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
-2026-08-28 23:49:48,179 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
-2026-08-28 23:50:20,059 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:12992 - "POST /ask HTTP/1.1" 200 OK
+[query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
+INFO:     127.0.0.1:12994 - "POST /ask HTTP/1.1" 200 OK
+[query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
+INFO:     127.0.0.1:13002 - "POST /ask HTTP/1.1" 200 OK
+[query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
+INFO:     127.0.0.1:13011 - "POST /ask HTTP/1.1" 200 OK
+[query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
+INFO:     127.0.0.1:13018 - "POST /ask HTTP/1.1" 200 OK
+2026-08-30 23:05:20,990 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-08-30 23:05:21,485 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+[query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
+INFO:     127.0.0.1:13040 - "POST /ask HTTP/1.1" 200 OK
+2026-08-30 23:05:22,654 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-08-30 23:05:23,057 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+[query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
+INFO:     127.0.0.1:13047 - "POST /ask HTTP/1.1" 200 OK
+2026-08-30 23:05:23,446 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-08-30 23:05:23,815 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-08-30 23:05:24,213 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-08-30 23:05:24,589 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+[query_parser] Ollama unavailable/slow (Ollama parse exceeded 1.5s); falling back to regex parser
+INFO:     127.0.0.1:13055 - "POST /ask HTTP/1.1" 200 OK
+2026-08-30 23:05:24,972 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-08-30 23:05:25,377 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
 [query_parser] used Ollama model 'qwen3:1.7b'
-INFO:     127.0.0.1:7054 - "POST /ask HTTP/1.1" 200 OK
-2026-08-28 23:50:20,366 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:13067 - "POST /ask HTTP/1.1" 200 OK
+2026-08-30 23:05:25,760 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
 [query_parser] used Ollama model 'qwen3:1.7b'
-INFO:     127.0.0.1:7060 - "POST /ask HTTP/1.1" 200 OK
-INFO:     127.0.0.1:7065 - "POST /ask HTTP/1.1" 200 OK
-2026-08-28 23:50:20,653 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:13072 - "POST /ask HTTP/1.1" 200 OK
+2026-08-30 23:05:26,206 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
 [query_parser] used Ollama model 'qwen3:1.7b'
-INFO:     127.0.0.1:7066 - "POST /ask HTTP/1.1" 200 OK
-2026-08-28 23:50:23,172 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
-[query_parser] used Ollama model 'qwen3:1.7b'
-INFO:     127.0.0.1:7072 - "POST /ask HTTP/1.1" 200 OK
-2026-08-28 23:50:25,666 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
-[query_parser] used Ollama model 'qwen3:1.7b'
-INFO:     127.0.0.1:7078 - "POST /ask HTTP/1.1" 200 OK
-INFO:     127.0.0.1:7085 - "POST /ask HTTP/1.1" 200 OK
-2026-08-28 23:50:30,179 INFO httpx: HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
-[query_parser] used Ollama model 'qwen3:1.7b'
-INFO:     127.0.0.1:7087 - "POST /ask HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13077 - "POST /ask HTTP/1.1" 200 OK

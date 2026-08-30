@@ -27,12 +27,7 @@ interface FormErrors {
 
 const LANGUAGE_OPTIONS = [
   'English',
-  'Assamese',
   'Hindi',
-  'Bengali',
-  'Spanish',
-  'French',
-  'German',
 ];
 
 export function CallingAgentModal({ isOpen, onClose }: CallingAgentModalProps) {
@@ -42,7 +37,7 @@ export function CallingAgentModal({ isOpen, onClose }: CallingAgentModalProps) {
     phoneNumber: '',
     email: '',
     preferredLanguage: 'English',
-    reasonForCall: '',
+    reasonForCall: 'General inquiry',
     consent: false,
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -69,7 +64,7 @@ export function CallingAgentModal({ isOpen, onClose }: CallingAgentModalProps) {
         phoneNumber: '',
         email: '',
         preferredLanguage: 'English',
-        reasonForCall: '',
+        reasonForCall: 'General inquiry',
         consent: false,
       });
       setErrors({});
@@ -132,7 +127,9 @@ export function CallingAgentModal({ isOpen, onClose }: CallingAgentModalProps) {
     const newErrors: FormErrors = {};
     let isValid = true;
 
-    (Object.keys(formData) as Array<keyof FormData>).forEach((field) => {
+    // Only name + phone are required for submission; email, reason and
+    // consent stay optional UI fields for now.
+    (['fullName', 'phoneNumber'] as Array<keyof FormData>).forEach((field) => {
       const error = validateField(field, formData[field]);
       if (error) {
         newErrors[field] = error;
@@ -161,7 +158,7 @@ export function CallingAgentModal({ isOpen, onClose }: CallingAgentModalProps) {
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Mark all as touched
     const allTouched: Record<string, boolean> = {};
@@ -172,11 +169,26 @@ export function CallingAgentModal({ isOpen, onClose }: CallingAgentModalProps) {
 
     if (!validateAll()) return;
 
-    // Simulate frontend loading state
     setStep('loading');
-    setTimeout(() => {
+
+    try {
+      const res = await fetch('/api/voice/calls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName: formData.fullName, phoneNumber: formData.phoneNumber }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to dispatch call');
+      }
+
       setStep('success');
-    }, 1600);
+    } catch (err: any) {
+      console.error('[modal] dispatch error:', err);
+      setStep('form');
+      alert(err.message || 'Failed to request call. Please try again.');
+    }
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {

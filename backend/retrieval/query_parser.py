@@ -59,9 +59,10 @@ class LLMQueryParser:
 Your ONLY job is to extract intent, programme, and semester from the user's query.
 
 RULES:
-1. VALID INTENTS: Choose exactly one: "subjects", "duration", "specializations", "internship", "administration", "scholarships", "attendance", "academic_calendar", "admissions", "student_services", "info".
+1. VALID INTENTS: Choose exactly one: "subjects", "duration", "specializations", "internship", "administration", "scholarships", "fees", "attendance", "academic_calendar", "admissions", "student_services", "info".
    - "administration": university leadership/staff (Vice Chancellor, president, dean, registrar, contacts, office hours).
    - "scholarships": scholarships, waivers, financial aid.
+   - "fees": fee, tuition, cost, or charge for a specific programme.
    - "attendance": attendance rules or minimum percentage.
    - "academic_calendar": semester start/end dates, exam dates, calendar events.
    - "admissions": admission process, required documents, eligibility.
@@ -90,6 +91,9 @@ Output: {"intent": "scholarships", "programme": null, "semester": null}
 
 User: "what is the attendance requirement?"
 Output: {"intent": "attendance", "programme": null, "semester": null}
+
+User: "what is the fee for BCA?"
+Output: {"intent": "fees", "programme": "BCA", "semester": null}
 
 User: "when does the semester start?"
 Output: {"intent": "academic_calendar", "programme": null, "semester": null}
@@ -180,9 +184,9 @@ def regex_parse(query: str, valid_programmes: Optional[List[str]] = None) -> Dic
     q = _normalize(query)
 
     # University-level intents first (they do not require a programme).
-    if re.search(r"\b(vice\s+chancellor|chancellor|president|registrar|dean|director|faculty|staff|administration|contact|email|phone|office\s+hours?)\b", q):
+    if re.search(r"\b(vice\s+chancellor|chancellor|vc|president|registrar|dean|director|faculty|staff|administration|governing\s+body|leadership|committee|committees|anti.?ragging|ragging|bullying|grievance|harassment|contact|email|phone|office\s+hours?)\b", q):
         intent = "administration"
-    elif re.search(r"\b(scholarship|scholarships|waiver|concession|financial\s+aid)\b", q):
+    elif re.search(r"\b(scholarship|scholarships|waiver|concession|financial\s+aid|xopun)\b", q):
         intent = "scholarships"
     elif re.search(r"\battendance\b", q):
         intent = "attendance"
@@ -200,6 +204,8 @@ def regex_parse(query: str, valid_programmes: Optional[List[str]] = None) -> Dic
         intent = "specializations"
     elif re.search(r"\b(internship|practicum|training|project)\b", q):
         intent = "internship"
+    elif re.search(r"\b(fee|fees|tuition|cost|costs|charge|charges)\b", q):
+        intent = "fees"
     else:
         intent = "info"
 
