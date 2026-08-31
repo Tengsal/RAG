@@ -975,7 +975,7 @@ const agentDefinition = defineAgent({
             if (p.identity.startsWith('sip_')) { sipIdentity = p.identity; break; }
           }
 
-          const transferTo = process.env.TRANSFER_TO_NUMBER || '+917085803754';
+          const transferTo = process.env.TRANSFER_TO_NUMBER || '+918119066970';
           if (sipIdentity) {
             try {
               const sipClient = new SipClient(
@@ -1146,6 +1146,10 @@ const agentDefinition = defineAgent({
       lastAudioActivityMs = Date.now();
       const words = trimmed.split(/\s+/).length;
       const isRealSpeech = words >= 2 || trimmed.length >= 6;
+      if (silenceGoodbyeInProgress && isRealSpeech) {
+        silenceGoodbyeInProgress = false;
+        logger.info('🔄 Caller speaking during the bye (interim) — cancelling hangup');
+      }
       if ((isSpeaking || greetingPlaying) && isRealSpeech) {
         if (isSpeaking) {
           interrupted = true;
@@ -1158,10 +1162,6 @@ const agentDefinition = defineAgent({
           }
         }
         if (greetingPlaying) greetingAbort.abort();
-        if (silenceGoodbyeInProgress) {
-          silenceGoodbyeInProgress = false;
-          logger.info('🔄 Caller speaking during the bye (interim) — cancelling hangup');
-        }
         logger.info(`🛑 Barge-in (interim): "${trimmed.slice(0, 80)}"`);
         try {
           const silenceSamples = sampleRate * 0.05;
