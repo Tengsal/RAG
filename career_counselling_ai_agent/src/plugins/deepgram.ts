@@ -17,6 +17,7 @@ export const createDeepgramSTT = (config: any) => {
   let isClosed:     boolean = false; // set to true on cleanup() — stop reconnecting
   let reconnectTimer: NodeJS.Timeout | null = null;
   let keepAliveTimer: NodeJS.Timeout | null = null;
+  let connGeneration = 0; // invalidates stale sockets' event handlers
 
   // Reconnect backoff + permanent-failure detection
   let reconnectDelayMs = 1000;
@@ -26,6 +27,12 @@ export const createDeepgramSTT = (config: any) => {
 
   // Buffer audio chunks that arrive during a reconnect gap
   const audioBuffer: Buffer[] = [];
+
+  // 10ms of valid linear16 silence @48kHz mono — keepalive payload.
+  // Sending real PCM (never an empty frame) keeps the stream alive without
+  // tripping the parser; a zero-byte frame made Deepgram silently drop the
+  // socket ~39s into calls.
+  const SILENCE_PCM = Buffer.alloc(960 * 2);
 
   // ── Map BCP-47 language codes to Deepgram language codes ────────────────
   const DEEPGRAM_LANG_MAP: Record<string, string> = {
@@ -62,6 +69,8 @@ export const createDeepgramSTT = (config: any) => {
   function connect() {
     if (isClosed) return;
 
+    const gen = ++connGeneration; // this socket's generation — stale handlers bail
+
     logger.info('🔄 Deepgram: creating live connection...');
 
     connection = deepgram.listen.live({
@@ -77,23 +86,22 @@ export const createDeepgramSTT = (config: any) => {
     });
 
     connection.on(LiveTranscriptionEvents.Open, () => {
+      if (gen !== connGeneration) return; // stale socket
       logger.info('🟢 Deepgram: connected');
       isConnected = true;
       consecutiveFailures = 0;
       reconnectDelayMs = 1000;
       emitter.emit('connected');
 
-      // Keepalive every 8s to prevent Deepgram closing idle connections
+      // Keepalive every 5s — valid PCM silence so Deepgram never drops the stream
       if (keepAliveTimer) clearInterval(keepAliveTimer);
       keepAliveTimer = setInterval(() => {
         if (isConnected && connection && connection.getReadyState() === 1) {
           try {
-            connection.keepAlive();
-          } catch (_) {
-            try { connection.send(Buffer.alloc(0)); } catch (_) {}
-          }
+            connection.send(SILENCE_PCM);
+          } catch (_) {}
         }
-      }, 8000);
+      }, 5000);
 
       // Flush buffered audio that arrived during reconnect
       if (audioBuffer.length > 0) {
@@ -106,6 +114,7 @@ export const createDeepgramSTT = (config: any) => {
     });
 
     connection.on(LiveTranscriptionEvents.Transcript, (data: any) => {
+      if (gen !== connGeneration) return; // stale socket
       const alt = data?.channel?.alternatives?.[0];
       if (!alt) return;
 
@@ -124,11 +133,12 @@ export const createDeepgramSTT = (config: any) => {
     });
 
     connection.on(LiveTranscriptionEvents.Error, (err: any) => {
-      if (isClosed) return; // teardown noise after close()
+      if (isClosed || gen !== connGeneration) return; // teardown/stale noise
       logger.error(`❌ Deepgram error: ${err?.message || err}`);
     });
 
     connection.on(LiveTranscriptionEvents.Close, () => {
+      if (gen !== connGeneration) return; // stale socket (finish() after reconnect)
       logger.warn('🔴 Deepgram: connection closed');
       isConnected = false;
       emitter.emit('disconnected');
@@ -162,11 +172,27 @@ export const createDeepgramSTT = (config: any) => {
       if (isConnected && connection && connection.getReadyState() === 1) {
         connection.send(buffer);
       } else {
-        // Buffer while reconnecting — cap at ~2 s of audio
-        if (audioBuffer.length < 40) {
+        // Buffer while reconnecting — keep the newest ~30 s of audio
+        if (audioBuffer.length < 600) {
+          audioBuffer.push(buffer);
+        } else {
+          audioBuffer.shift();
           audioBuffer.push(buffer);
         }
       }
+    },
+
+    // Force-reconnect a connection that has gone silently dead (no transcripts
+    // despite audio flowing). Invalidates the old socket via connGeneration.
+    reconnect: () => {
+      if (isClosed || sttFailed) return;
+      logger.warn('🔁 Deepgram: forced reconnect requested');
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (keepAliveTimer) clearInterval(keepAliveTimer);
+      isConnected = false;
+      connGeneration++; // invalidate the old socket's handlers
+      try { connection?.finish(); } catch (_) {}
+      reconnectTimer = setTimeout(connect, 2000);
     },
 
     close: () => {

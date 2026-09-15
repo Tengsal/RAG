@@ -388,6 +388,8 @@ const agentDefinition = defineAgent({
     let silenceGoodbyeInProgress = false;
     let silenceActionInProgress = false;
     let sttHealthy = false;
+    let lastSttOutputMs = Date.now(); // Deepgram transcripts/interims (zombie detection)
+    let lastSttReconnectAt = 0; // cooldown for forced STT reconnects
     let greetingPlaying = false;
     let activeTurnId: string | null = null;
     let playbackTurnId: string | null = null;
@@ -732,8 +734,18 @@ const agentDefinition = defineAgent({
     // ✅ FIXED: checks agentBusy (covers TTS generation time, not just playback)
     // ✅ FIXED: reduced poll interval from 2000ms to 1500ms for tighter detection
     const silenceCheckInterval = setInterval(async () => {
+      // ✅ STT zombie detection: caller audibly speaking (energy clock fresh)
+      // but Deepgram has produced nothing for 6s → force reconnect
+      if (!callEnded && !transferring && callAnswered && sttHealthy
+          && Date.now() - lastAudioActivityMs < 3000
+          && Date.now() - lastSttOutputMs > 6000
+          && Date.now() - lastSttReconnectAt > 30000) {
+        lastSttReconnectAt = Date.now();
+        logger.warn('🔴 STT zombie detected (audio in, no transcripts) — forcing reconnect');
+        try { stt.reconnect(); } catch {}
+      }
       // Never count silence while the agent is busy (speaking OR generating TTS)
-      if (callEnded || isSpeaking || agentBusy || greetingPlaying || !callAnswered || silenceActionInProgress) return;
+      if (callEnded || transferring || isSpeaking || agentBusy || greetingPlaying || !callAnswered || silenceActionInProgress) return;
 
       const elapsed = Date.now() - callStartTime;
       if (elapsed > maxDurationMs && !silenceGoodbyeInProgress) {
@@ -760,6 +772,10 @@ const agentDefinition = defineAgent({
         logger.info(`🔇 ${(silenceMs / 1000).toFixed(0)}s of user silence — saying bye and hanging up`);
         conversationHistory.push({ role: 'assistant', content: 'Okay, thank you, bye!' });
         await speak('Okay, thank you, bye!');
+        // ✅ Grace for Deepgram finalization latency (endpointing 300ms +
+        // utterance_end 1500ms + network) — give the final transcript time
+        // to arrive and cancel the hangup before endCall fires.
+        if (silenceGoodbyeInProgress) await sleep(2500);
         if (silenceGoodbyeInProgress) {
           await endCall('silence_timeout');
         } else {
@@ -777,6 +793,8 @@ const agentDefinition = defineAgent({
         } finally {
           silenceActionInProgress = false;
         }
+        // ✅ The caller must get a FULL answer window AFTER hearing the warning
+        lastAudioActivityMs = Date.now();
       }
     }, 1500); // ✅ 1500ms poll (was 2000ms) — tighter detection
 
@@ -825,6 +843,8 @@ const agentDefinition = defineAgent({
       const transcriptLower = text.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, '').trim();
       if (!isSystemResume && FILLER_WORDS.has(transcriptLower)) {
         logger.info(`🔇 Dropped filler: "${text}"`);
+        lastAudioActivityMs = Date.now(); // ✅ filler is caller speech — refresh the silence clock
+        silenceWarningFired = false;
         interrupted = false;
         return;
       }
@@ -862,6 +882,30 @@ const agentDefinition = defineAgent({
           const silenceFrame = new AudioFrame(new Int16Array(silenceSamples), sampleRate, 1, silenceSamples);
           await audioSource.captureFrame(silenceFrame).catch(() => {});
         } catch {}
+      }
+
+      // ✅ Deterministic gate: filler/noise input advances the flow on script —
+      // no LLM. Fixes "agent goes silent after background noise / generic
+      // inquiry" for the prototype.
+      if (!isSystemResume) {
+        const gateWords = transcriptLower.split(/\s+/).filter(Boolean);
+        const allFiller = gateWords.length > 0 && gateWords.every((w) => FILLER_WORDS.has(w));
+        const repeatedNoise = gateWords.length >= 3 && new Set(gateWords).size <= 2;
+        if (allFiller || repeatedNoise) {
+          logger.info(`🎯 Deterministic gate: "${text}" → scripted flow advance (no LLM)`);
+          lastAudioActivityMs = Date.now();
+          silenceWarningFired = false;
+          interrupted = false;
+          const from = currentStage;
+          currentStage = currentStage === 'greeting' || currentStage === 'open_questions'
+            ? 'qualification'
+            : currentStage === 'qualification' ? 'desired_course' : 'callback';
+          pendingFlowQuestion = flowQuestions[currentStage];
+          turnLog(activeTurnId || 'SYSTEM', 'STAGE_ADVANCE', { from, to: currentStage, deterministic: true });
+          await speak(currentStage === 'qualification' ? 'Ji, bilkul. Chaliye shuru karte hain.' : 'Ji, bilkul.');
+          await speakFlowQuestion();
+          return;
+        }
       }
 
       if (!isSystemResume) {
@@ -983,7 +1027,11 @@ const agentDefinition = defineAgent({
                 process.env.LIVEKIT_API_KEY!,
                 process.env.LIVEKIT_API_SECRET!,
               );
-              await sipClient.transferSipParticipant(roomName, sipIdentity, transferTo);
+              await Promise.race([
+                sipClient.transferSipParticipant(roomName, sipIdentity, transferTo),
+                new Promise((_, reject) =>
+                  setTimeout(() => reject(new Error('SIP transfer timeout after 8s')), 8000)),
+              ]);
               logger.info(`📞 Caller ${sipIdentity} transferred to ${transferTo} — agent leaving the call`);
             } catch (e: any) {
               logger.error(`❌ SIP transfer failed: ${e?.message || e}`);
@@ -1064,6 +1112,16 @@ const agentDefinition = defineAgent({
             await endCall('llm_timeout');
           } else {
             logger.info('🛑 Turn aborted (barge-in). Waiting for the caller to finish.');
+            // ✅ Deterministic recovery: if the flow question was lost with this
+            // turn, re-ask it once the agent is idle.
+            isSpeaking = false;
+            agentBusy = false;
+            interrupted = false;
+            await sleep(1500);
+            if (!callEnded && !transferring && !isSpeaking && !agentBusy && pendingFlowQuestion) {
+              logger.info('🎯 Deterministic re-ask after aborted turn');
+              await speakFlowQuestion();
+            }
           }
         } else if (err?.status === 400 || err?.status === 404 || err?.code === 'model_not_found' || err?.code === 'invalid_request_error') {
           logger.error(`❌ FATAL LLM error (${err?.status || err?.code}): ${err?.message || err}. Ending call.`);
@@ -1132,6 +1190,7 @@ const agentDefinition = defineAgent({
 
     // 12. Wire STT events + room audio
     stt.on('transcript', (text: string) => {
+      lastSttOutputMs = Date.now();
       if (callEnded || transferring) return; // ✅ Drop transcripts after call ended / during transfer
       if (playbackTurnId) {
         logger.warn(`[OVERLAP] finalTranscript=${JSON.stringify(text)} playbackTurnId=${playbackTurnId} activeTurnId=${activeTurnId || 'none'}`);
@@ -1143,15 +1202,19 @@ const agentDefinition = defineAgent({
     stt.on('interimTranscript', (text: string) => {
       const trimmed = (text || '').trim();
       if (trimmed.length < 2 || callEnded || transferring) return;
+      lastSttOutputMs = Date.now();
       lastAudioActivityMs = Date.now();
       const words = trimmed.split(/\s+/).length;
       const isRealSpeech = words >= 2 || trimmed.length >= 6;
-      if (silenceGoodbyeInProgress && isRealSpeech) {
+      // Even a short answer ("Yes,") during the bye must cancel the hangup.
+      const isAnyLetterSpeech = trimmed.length >= 3 && /\p{L}/u.test(trimmed);
+      if (silenceGoodbyeInProgress && (isRealSpeech || isAnyLetterSpeech)) {
         silenceGoodbyeInProgress = false;
         logger.info('🔄 Caller speaking during the bye (interim) — cancelling hangup');
       }
-      if ((isSpeaking || greetingPlaying) && isRealSpeech) {
-        if (isSpeaking) {
+      // Barge-in aborts PLAYBACK only — never in-flight LLM generation.
+      if ((playbackTurnId || greetingPlaying) && isRealSpeech) {
+        if (playbackTurnId) {
           interrupted = true;
           turnLog(activeTurnId || 'SYSTEM', 'IS_SPEAKING_CHANGE', { value: false, reason: 'interim-barge-in' });
           isSpeaking = false;
@@ -1160,6 +1223,14 @@ const agentDefinition = defineAgent({
             currentAbortController.abort();
             currentAbortController = null;
           }
+          // ✅ re-ask after playback barge-in (turn completes without throwing)
+          setTimeout(() => {
+            if (callEnded || transferring || isSpeaking || agentBusy || playbackTurnId) return;
+            if (!pendingFlowQuestion) return;
+            interrupted = false;
+            logger.info('🎯 Deterministic re-ask after playback barge-in');
+            speakFlowQuestion().catch(() => {});
+          }, 2500);
         }
         if (greetingPlaying) greetingAbort.abort();
         logger.info(`🛑 Barge-in (interim): "${trimmed.slice(0, 80)}"`);
@@ -1176,6 +1247,11 @@ const agentDefinition = defineAgent({
     // STT health tracking
     stt.on('connected', () => {
       sttHealthy = true;
+      // ✅ Fresh silence window after every (re)connect — accumulated silence
+      // during a WS flap must not fire the bye.
+      lastSttOutputMs = Date.now();
+      lastAudioActivityMs = Date.now();
+      silenceWarningFired = false;
       logger.info('✅ STT online — silence watchdog armed');
     });
     stt.on('disconnected', () => {
@@ -1217,6 +1293,15 @@ const agentDefinition = defineAgent({
             if (value) {
               const buffer = Buffer.from(value.data.buffer, value.data.byteOffset, value.data.byteLength);
               stt.pushAudio(buffer);
+              // ✅ Energy-based silence detection: caller audible → refresh clock.
+              // (Transcript-based clock treats a deaf-STT caller as silent.)
+              const samples = value.data as Int16Array;
+              let sum = 0;
+              for (let i = 0; i < samples.length; i++) sum += Math.abs(samples[i]);
+              if (samples.length > 0 && sum / samples.length > 500) {
+                lastAudioActivityMs = Date.now();
+                silenceWarningFired = false;
+              }
             }
           }
         } catch (_) {
@@ -1340,10 +1425,12 @@ const agentDefinition = defineAgent({
 
               conversationHistory.push({ role: 'assistant', content: greetingResult.text });
               conversationHistory.push({ role: 'system', content: POST_GREETING_RULES });
-              currentStage = 'open_questions';
-              pendingFlowQuestion = flowQuestions.open_questions;
-              turnLog('SYSTEM', 'STAGE_ADVANCE', { from: 'greeting', to: 'open_questions' });
-              await speakFlowQuestion('SYSTEM', greetingAbort.signal);
+              if (currentStage === 'greeting') { // a deterministic-gate advance during the greeting wins
+                currentStage = 'open_questions';
+                pendingFlowQuestion = flowQuestions.open_questions;
+                turnLog('SYSTEM', 'STAGE_ADVANCE', { from: 'greeting', to: 'open_questions' });
+                await speakFlowQuestion('SYSTEM', greetingAbort.signal);
+              }
             } else {
               logger.error('❌ Greeting TTS failed/empty.');
               greetingPlaying = true;
@@ -1360,10 +1447,12 @@ const agentDefinition = defineAgent({
                 content: 'Namaste ji, main Career Guidance Centre se bol rahi hoon. Kya aapko abhi thoda time hai?',
               });
               conversationHistory.push({ role: 'system', content: POST_GREETING_RULES });
-              currentStage = 'open_questions';
-              pendingFlowQuestion = flowQuestions.open_questions;
-              turnLog('SYSTEM', 'STAGE_ADVANCE', { from: 'greeting', to: 'open_questions' });
-              await speakFlowQuestion('SYSTEM', greetingAbort.signal);
+              if (currentStage === 'greeting') { // a deterministic-gate advance during the greeting wins
+                currentStage = 'open_questions';
+                pendingFlowQuestion = flowQuestions.open_questions;
+                turnLog('SYSTEM', 'STAGE_ADVANCE', { from: 'greeting', to: 'open_questions' });
+                await speakFlowQuestion('SYSTEM', greetingAbort.signal);
+              }
             }
           } catch (e: any) {
             const sipStatus = e?.metadata?.sip_status || '';
