@@ -50,12 +50,22 @@ _VALID_INTEREST_TAGS = set(INTEREST_TAGS.keys())
 _MATHS_LOW = ["weak in maths", "weak in math", "weak at maths", "weak at math",
               "not good at maths", "not good at math", "bad at maths", "bad at math",
               "hate maths", "hate math", "maths phobia", "without maths", "no maths",
-              "struggle with maths", "struggle with math", "not strong in maths"]
+              "struggle with maths", "struggle with math", "not strong in maths",
+              "dont like maths", "don't like maths", "do not like maths",
+              "dont like math", "don't like math", "do not like math",
+              "not a maths person", "not a math person",
+              "maths is hard", "math is hard",
+              "afraid of maths", "afraid of math",
+              "not interested in maths", "not interested in math",
+              "hate mathematics", "dislike maths", "dislike math"]
 _MATHS_OK = ["maths is fine", "math is fine", "maths is okay", "math is okay",
              "okay at maths", "ok at maths", "average in maths"]
 _MATHS_HIGH = ["good at maths", "good at math", "strong in maths", "strong in math",
                "love maths", "love math", "excellent in maths", "maths is my strength",
-               "enjoy maths"]
+               "enjoy maths",
+               "like maths", "like math", "love mathematics",
+               "good with maths", "good with math",
+               "maths is easy", "math is easy"]
 
 # A negated positive ("not very good at maths") must not read as "high": the
 # _MATHS_HIGH phrases are substrings of their own negations.
@@ -351,7 +361,7 @@ def regex_parse(query: str, valid_programmes: Optional[List[str]] = None) -> Dic
 
     # Counselling intents first, each gated on the signals it needs so old
     # factual queries keep their previous intent labels.
-    if len(programmes) >= 2 or re.search(r"\b(vs|versus|compare|comparison|difference between)\b", q):
+    if len(programmes) >= 2 or re.search(r"\b(vs|versus|compare|comparison|difference between|better than|better between)\b", q):
         intent = "comparison"
     elif (percentage is not None or stream) and re.search(
             r"\b(eligible|eligibility|qualify|can i get|can i study|what can i)\b", q):

@@ -418,7 +418,12 @@ def _programme_sources_list(retriever: "StructuredCurriculumRetriever", programm
 
 
 def _all_subjects(programme, retriever) -> List[str]:
-    """Return unique programme subjects from either supported semester shape."""
+    """Return unique programme subjects from either supported semester shape.
+
+    semesters_index is a FALLBACK: consulted only when the record itself
+    lists no subjects, so the same course is never counted twice under two
+    names (e.g. BCA "Mathematics" + index "Mathematics I").
+    """
     subjects: List[str] = []
     seen = set()
 
@@ -438,10 +443,11 @@ def _all_subjects(programme, retriever) -> List[str]:
             if isinstance(semester, dict):
                 add(semester.get("subjects"))
 
-    programme_code = (programme or {}).get("programme_code", "")
-    for entry in _path_get(retriever.university, ("semesters_index",)) or []:
-        if isinstance(entry, dict) and retriever._norm(entry.get("programme_code", "")) == retriever._norm(programme_code):
-            add(entry.get("subjects"))
+    if not subjects:
+        programme_code = (programme or {}).get("programme_code", "")
+        for entry in _path_get(retriever.university, ("semesters_index",)) or []:
+            if isinstance(entry, dict) and retriever._norm(entry.get("programme_code", "")) == retriever._norm(programme_code):
+                add(entry.get("subjects"))
     return subjects
 
 
@@ -558,6 +564,59 @@ def _compare_programmes(codes, retriever) -> str:
     return "\n".join(rows)
 
 
+def _single_programme_comparison(code, unknown_codes, retriever) -> str:
+    """Degraded comparison when fewer than two named programmes are offered.
+
+    One known + one unknown ("Is MBA better than B.Tech?") states that the
+    unknown is not offered, then gives the known programme's facts. A lone
+    known programme gets a follow-up question listing similar programmes.
+    """
+    programme = retriever.find_programme(code) or {}
+    name = programme.get("programme_name") or code
+    duration = programme.get("duration") or {}
+    if isinstance(duration, dict):
+        duration_text = f"{duration.get('years', '—')} years"
+    else:
+        duration_text = str(duration) if duration else "—"
+    fees = programme.get("fee_structure") or {}
+    row = _eligibility_row(code, retriever) or {}
+    specializations = programme.get("specializations_list") or programme.get("specializations") or []
+
+    if unknown_codes:
+        unknown = ", ".join(unknown_codes)
+        lines = [
+            f"I can compare {name} for you, but {unknown} is not offered at "
+            f"Assam Down Town University. Here are the details for {name}:"
+        ]
+    else:
+        lines = [f"I found {name}. Would you like to compare it with another ADTU programme?"]
+
+    lines.append(f"• Duration: {duration_text}")
+    lines.append(f"• Tuition per semester: {fees.get('tuition_per_semester', '—')}")
+    lines.append(f"• Approx. annual fee: {fees.get('approx_annual_fee', '—')}")
+    lines.append(f"• Eligibility: {row.get('additional') or row.get('min_qualification') or 'not listed'}")
+    if specializations:
+        lines.append(f"• Specializations ({len(specializations)}): " + ", ".join(list(specializations)[:5]))
+
+    if unknown_codes:
+        lines.append(
+            f"If you're considering {', '.join(unknown_codes)} at another university, "
+            "I can only provide information about ADTU programmes."
+        )
+    else:
+        category = _programme_category(code)
+        same, other = [], []
+        for candidate in retriever.data.get("programmes", []):
+            candidate_code = candidate.get("programme_code", "")
+            if not candidate_code or retriever._norm(candidate_code) == retriever._norm(code):
+                continue
+            (same if _programme_category(candidate_code) == category else other).append(candidate_code)
+        options = (same + other)[:4]
+        if options:
+            lines.append("Available options include: " + ", ".join(options) + ".")
+    return "\n".join(lines)
+
+
 def _recommend_programmes(parsed, retriever) -> str:
     interests = set(parsed.get("interests") or [])
     maths_confidence = parsed.get("maths_confidence")
@@ -565,6 +624,9 @@ def _recommend_programmes(parsed, retriever) -> str:
     budget = parsed.get("budget")
     if not any((interests, maths_confidence, duration_preference, budget)):
         return "What interests you most, and how comfortable are you with maths?"
+    named = set(parsed.get("programmes") or [])
+    if parsed.get("programme"):
+        named.add(parsed["programme"])
     ranked = []
     for programme in retriever.data.get("programmes", []):
         score = 0
@@ -578,12 +640,21 @@ def _recommend_programmes(parsed, retriever) -> str:
         if category in interests:
             score += 3
             reasons.append(f"matches your interest in {category.replace('_', ' ')}")
+        semester_count = duration.get("semesters") if isinstance(duration, dict) else None
+        maths_span = f" across {semester_count} semesters" if semester_count else ""
         if maths_confidence == "low" and maths_load <= 2:
             score += 2
-            reasons.append(f"has a lower maths-heavy subject load ({maths_load})")
+            reasons.append(
+                f"Lower maths load ({maths_load} maths subjects{maths_span}) — better fit if you prefer less mathematics"
+            )
         elif maths_confidence == "high" and maths_load >= 3:
             score += 2
-            reasons.append(f"has a higher maths-heavy subject load ({maths_load})")
+            reasons.append(
+                f"Higher maths load ({maths_load}+ maths subjects{maths_span}) — stronger fit if you enjoy mathematics"
+            )
+        if code in named:
+            score += 3
+            reasons.append("matches the programme you asked about")
         if duration_preference and ((str(duration_preference) == "3y" and years == 3) or (str(duration_preference) in ("4y", "4y+") and years and years >= 4)):
             score += 1
             reasons.append(f"matches your {duration_preference} duration preference")
@@ -593,7 +664,19 @@ def _recommend_programmes(parsed, retriever) -> str:
         ranked.append((score, code, programme, reasons))
     ranked.sort(key=lambda item: (-item[0], item[1]))
     top = ranked[:2]
-    guidance = [f"• {code}: " + (", ".join(reasons) if reasons else "closest overall match from the available signals") for _, code, _, reasons in top]
+    guidance = []
+    for _, code, programme, reasons in top:
+        duration = programme.get("duration") or {}
+        years = duration.get("years") if isinstance(duration, dict) else None
+        annual_fee = (programme.get("fee_structure") or {}).get("approx_annual_fee")
+        summary = ", ".join(reasons) if reasons else "closest overall match from the available signals"
+        tail = ", ".join(
+            part for part in (
+                f"{years} years" if years else "",
+                f"{annual_fee}/year" if annual_fee else "",
+            ) if part
+        )
+        guidance.append(f"• {code}: {summary}" + (f". {tail}" if tail else ""))
     facts = []
     for _, code, programme, _ in top:
         duration = programme.get("duration") or {}
@@ -692,8 +775,17 @@ def format_answer(query: str, parsed: Dict[str, Any], retriever: StructuredCurri
             )
             source_codes = evaluation_codes
         elif intent == "comparison":
-            answer = _compare_programmes(codes, retriever)
-            source_codes = codes
+            known_codes = [c for c in codes if retriever.find_programme(c)]
+            unknown_codes = [c for c in codes if not retriever.find_programme(c)]
+            if len(known_codes) >= 2:
+                answer = _compare_programmes(known_codes, retriever)
+                source_codes = known_codes
+            elif known_codes:
+                answer = _single_programme_comparison(known_codes[0], unknown_codes, retriever)
+                source_codes = known_codes
+            else:
+                answer = _compare_programmes(codes, retriever)
+                source_codes = codes
         elif intent == "recommendation":
             answer = _recommend_programmes(parsed, retriever)
             source_codes = codes or retriever.valid_programme_codes

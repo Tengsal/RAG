@@ -28,9 +28,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 try:  # Supports both `uvicorn api:app` from backend/ and `backend.api` from root.
-    from retrieval.structured_retriever import CurriculumQA, UNIVERSITY_INTENTS
+    from retrieval.structured_retriever import CurriculumQA, UNIVERSITY_INTENTS, COUNSELLING_INTENTS
 except ModuleNotFoundError:
-    from backend.retrieval.structured_retriever import CurriculumQA, UNIVERSITY_INTENTS
+    from backend.retrieval.structured_retriever import CurriculumQA, UNIVERSITY_INTENTS, COUNSELLING_INTENTS
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("adtu.api")
@@ -175,7 +175,7 @@ def ask(req: QueryRequest) -> dict:
         "years": [],
     }
 
-    if not programme and intent not in UNIVERSITY_INTENTS:
+    if not programme and intent not in UNIVERSITY_INTENTS and intent not in COUNSELLING_INTENTS:
         # Programme-specific question with no programme identified -> clarify.
         return _response(query=text, status="CLARIFY", intent=intent, entities=entities,
                          confidence_score=0.2, confidence_label="LOW", answer=None,

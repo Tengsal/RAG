@@ -12,6 +12,7 @@ import { TypewriterHeadline } from '@/components/typewriter-headline';
 import { HERO_DATA, NAV_ITEMS, FEATURE_ITEMS } from '@/lib/landing-data';
 import { useAuth } from '@/context/auth-context';
 import { CallingAgentModal } from '@/components/calling-agent-modal';
+import { ChatWidget } from '@/components/chat-widget';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,7 @@ export default function LandingPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [chatInput, setChatInput] = useState('');
   const [isCallingModalOpen, setIsCallingModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeNav, setActiveNav] = useState('#hero');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -313,7 +315,7 @@ void main() {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={handleTryAssistant}
+              onClick={() => setIsChatOpen(true)}
               className="w-full sm:w-auto px-10 py-4 sm:py-4.5 rounded-full bg-[#4441cc] hover:bg-[#3835be] text-white font-bold text-base sm:text-lg hover:shadow-[0_0_40px_rgba(68,65,204,0.4)] transition-all shadow-xl flex items-center justify-center gap-2.5 group"
             >
               <span className="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">forum</span>
@@ -547,6 +549,13 @@ void main() {
       <CallingAgentModal
         isOpen={isCallingModalOpen}
         onClose={() => setIsCallingModalOpen(false)}
+      />
+
+      {/* Ask Campus AI Widget */}
+      <ChatWidget
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        onOpenFullChat={handleTryAssistant}
       />
     </div>
   );
