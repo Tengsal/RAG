@@ -8,10 +8,12 @@ the EXACT RAGResponse shape the frontend already consumes, so the frontend
 needs zero changes.
 """
 
+import json
 import logging
 import re
 import sys
 import time
+from pathlib import Path
 from typing import Optional
 
 # Windows consoles default to cp1252, which cannot encode the emoji in the
@@ -104,6 +106,41 @@ class QueryRequest(BaseModel):
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Public sentiment dashboard
+# ---------------------------------------------------------------------------
+_SENTIMENT_FILE = Path(__file__).parent / "data" / "sentiment" / "latest_report.json"
+
+_SENTIMENT_MOCK = {
+    "overall": {"positive": 62, "neutral": 23, "critical": 15},
+    "themes": {
+        "positive": ["Faculty Support", "Campus Infrastructure", "Course Variety"],
+        "critical": ["Fee Structure", "Hostel Facilities", "Placement Speed"],
+    },
+    "trend": [
+        {"week": "Week 1", "positive": 64, "critical": 12},
+        {"week": "Week 2", "positive": 61, "critical": 14},
+        {"week": "Week 3", "positive": 66, "critical": 11},
+        {"week": "Week 4", "positive": 62, "critical": 15},
+    ],
+    "sources": [
+        {"url": "https://reddit.com/r/adtu", "title": "Discussion on ADTU placements"},
+        {"url": "https://news.example.com/adtu-ai-lab", "title": "ADTU announces new AI lab"},
+    ],
+}
+
+
+@app.get("/api/sentiment")
+def sentiment() -> dict:
+    """Latest weekly sentiment report, or the demo shape if none exists yet."""
+    try:
+        with open(_SENTIMENT_FILE, "r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except Exception as exc:
+        log.info("sentiment report unavailable (%s); serving mock", exc)
+        return _SENTIMENT_MOCK
 
 
 @app.post("/ask")

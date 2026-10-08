@@ -7,6 +7,7 @@ import { HowItWorks } from '@/components/how-it-works';
 import { WhatsHappening } from '@/components/whats-happening';
 import { ProductPreviewDeck } from '@/components/product-preview-deck';
 import { TrustSecuritySection } from '@/components/trust-security-section';
+import { SentimentDashboard } from '@/components/sentiment-dashboard';
 import { WhyVoiceSection } from '@/components/why-voice-section';
 import { TypewriterHeadline } from '@/components/typewriter-headline';
 import { HERO_DATA, NAV_ITEMS, FEATURE_ITEMS } from '@/lib/landing-data';
@@ -351,6 +352,13 @@ void main() {
 
         {/* Trust, Security & Reliability Section */}
         <TrustSecuritySection />
+
+        {/* Public Sentiment & Perception Dashboard */}
+        <section id="sentiment" className="mb-24 border-y border-slate-200/70 bg-slate-50 py-20">
+          <div className="mx-auto max-w-[1440px] px-6 sm:px-20">
+            <SentimentDashboard />
+          </div>
+        </section>
 
         {/* Campus Pulse & Student Notices ("What's Happening at AdtU") */}
         <WhatsHappening />
